@@ -1,4 +1,4 @@
-package com.cesur.backend.model.enums;
+package com.cesur.backend.model;
 
 public enum Plataforma {
     CASA,

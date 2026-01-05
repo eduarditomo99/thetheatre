@@ -1,6 +1,5 @@
 package com.cesur.backend.model;
 
-import com.cesur.backend.model.enums.Plataforma;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
