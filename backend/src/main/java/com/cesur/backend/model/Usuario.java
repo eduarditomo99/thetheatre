@@ -1,11 +1,6 @@
 package com.cesur.backend.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,13 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "usuarios", uniqueConstraints = {@UniqueConstraint(columnNames = {"username"}), @UniqueConstraint(columnNames = {"email"})})
 public class Usuario implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,16 +25,27 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private String email;
 
-    // Validación de contraseña segura:
-    // Mínimo 8 caracteres, 1 mayúscula, 1 número, 1 carácter especial
-    // (Esta validación saltará antes de guardar en base de datos)
-    // Nota: El regex se aplicará en el DTO de registro, aquí guardaremos la password ENCRIPTADA.
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // --- Métodos obligatorios de Spring Security ---
+    // --- CONSTRUCTORES MANUALES ---
+
+    public Usuario() {
+    }
+
+    public Usuario(Long id, String username, String nombre, String apellidos, String email, String password, Role role) {
+        this.id = id;
+        this.username = username;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    // --- MÉTODOS OBLIGATORIOS DE USERDETAILS (Los que daban el error) ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -50,14 +53,82 @@ public class Usuario implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public String getPassword() {
+        return password;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public String getUsername() {
+        return username; // Devuelve el nickname
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    // --- GETTERS Y SETTERS MANUALES (Para el resto de campos) ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }
