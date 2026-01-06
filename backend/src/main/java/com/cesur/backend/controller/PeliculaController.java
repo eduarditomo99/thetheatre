@@ -2,36 +2,36 @@ package com.cesur.backend.controller;
 
 import com.cesur.backend.model.Pelicula;
 import com.cesur.backend.service.PeliculaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/peliculas")
 public class PeliculaController {
 
-    @Autowired
-    private PeliculaService peliculaService;
+    private final PeliculaService peliculaService;
 
-    @GetMapping
-    public List<Pelicula> listarPeliculas() {
-        return peliculaService.obtenerTodas();
+    // Constructor manual
+    public PeliculaController(PeliculaService peliculaService) {
+        this.peliculaService = peliculaService;
     }
 
-    @GetMapping("/{id}")
-    public Optional<Pelicula> obtenerPelicula(@PathVariable Long id) {
-        return peliculaService.obtenerPorId(id);
+    // GET MODIFICADO: Ahora detecta quién eres y filtra
+    @GetMapping
+    public List<Pelicula> obtenerPeliculas(Principal principal) {
+        if (principal != null) {
+            // Si el usuario está logueado (tiene Token), filtramos las vistas
+            return peliculaService.listarPeliculasParaHome(principal.getName());
+        } else {
+            // Si no está logueado (y la seguridad lo permitiera), mostramos todas
+            return peliculaService.listarTodas();
+        }
     }
 
     @PostMapping
     public Pelicula crearPelicula(@RequestBody Pelicula pelicula) {
         return peliculaService.guardarPelicula(pelicula);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminarPelicula(@PathVariable Long id) {
-        peliculaService.borrarPelicula(id);
     }
 }
