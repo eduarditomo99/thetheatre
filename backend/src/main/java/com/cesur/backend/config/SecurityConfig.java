@@ -2,6 +2,7 @@ package com.cesur.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,7 +23,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    // Constructor manual (Sin Lombok)
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
@@ -32,12 +32,21 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                // Configuración de CORS para permitir conexiones desde el Front
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usamos la config de abajo
                 .authorizeHttpRequests(auth -> auth
-                        // Permite acceso libre a Login y Registro
-                        .requestMatchers("/auth/**").permitAll()
-                        // El resto de rutas requieren Token
+                        // 1. Permitir pre-flight checks (CORS)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 2. Permitir Auth (Registro y Login)
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 3. CLAVE DEL ÉXITO: Permitir ver los errores internos
+                        .requestMatchers("/error").permitAll()
+
+                        // 4. Swagger (Opcional)
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // 5. El resto bloqueado
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -49,22 +58,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Bean para configurar quién puede conectarse a tu API
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Aquí pones las URL de tu frontend. He puesto las típicas de Angular, React y Vite
-        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:5173"));
-
-        // Métodos permitidos
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Cabeceras permitidas
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
-        // Permitir credenciales
+        // Orígenes exactos de tu frontend
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4200", "http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(List.of("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

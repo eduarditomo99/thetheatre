@@ -24,26 +24,24 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    public String getUsernameFromToken(String token) {
+    // Usado por el Filtro de Seguridad
+    public String getUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    // --- CORRECCIÓN: Método alias para que funcione el ReviewController ---
+    public String getUsernameFromToken(String token) {
+        return getUsername(token);
     }
+    // ---------------------------------------------------------------------
 
-    public String generateToken(UserDetails userDetails) {
+    public String getToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    // ESTE ES EL METODO QUE TE FALTABA PARA EL CONTROLADOR
-    public String getToken(UserDetails userDetails) {
-        return generateToken(userDetails);
-    }
-
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder()
+        return Jwts
+                .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -53,7 +51,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
+        final String username = getUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
@@ -63,6 +61,11 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
