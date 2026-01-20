@@ -37,7 +37,6 @@ public class JwtService {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    // ESTE ES EL METODO QUE TE FALTABA PARA EL CONTROLADOR
     public String getToken(UserDetails userDetails) {
         return generateToken(userDetails);
     }
