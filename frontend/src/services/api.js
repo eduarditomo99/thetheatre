@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// 1. Instancia para Backend (Spring Boot)
+// 1. Instancia para TU Backend (Spring Boot)
+// CAMBIO IMPORTANTE: Ponemos la URL explícita para asegurar la conexión
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: 'http://localhost:8080',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -25,11 +26,11 @@ api.interceptors.request.use(
     }
 );
 
-// 2. Instancia para TMDB (Películas externas) - 
+// 2. Instancia para TMDB (Películas externas)
 const tmdbApi = axios.create({
-    baseURL: import.meta.env.VITE_TMDB_BASE_URL,
+    baseURL: 'https://api.themoviedb.org/3', // Ponemos la URL directa también por seguridad
     params: {
-        api_key: import.meta.env.VITE_TMDB_API_KEY,
+        api_key: import.meta.env.VITE_TMDB_API_KEY, // Asegúrate de que esta key esté en tu .env
         language: 'es-ES',
     },
 });
