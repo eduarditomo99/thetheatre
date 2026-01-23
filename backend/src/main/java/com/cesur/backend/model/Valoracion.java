@@ -1,5 +1,6 @@
 package com.cesur.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -10,35 +11,22 @@ public class Valoracion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación con Usuario
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnore
     private Usuario usuario;
 
-    // Relación con Película
-    @ManyToOne
-    @JoinColumn(name = "pelicula_id", nullable = false)
-    private Pelicula pelicula;
-
-    // Puntuación opcional (1-10)
+    private Long tmdbId;
     private Integer puntuacion;
+    private boolean visto;
 
-    // Reseña opcional
     @Column(length = 2000)
     private String resena;
 
-    // Dónde la vio
-    @Enumerated(EnumType.STRING)
-    private Plataforma plataforma; // CASA o CINE
-
-    // Fecha en que la vio
     private LocalDate fechaVista;
 
-    // --- CONSTRUCTOR VACÍO (Obligatorio para JPA) ---
     public Valoracion() {
     }
-
-    // --- GETTERS Y SETTERS MANUALES (Aquí está la solución a tu error) ---
 
     public Long getId() {
         return id;
@@ -52,17 +40,16 @@ public class Valoracion {
         return usuario;
     }
 
-    // ¡Este es el método que Java no encontraba!
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
 
-    public Pelicula getPelicula() {
-        return pelicula;
+    public Long getTmdbId() {
+        return tmdbId;
     }
 
-    public void setPelicula(Pelicula pelicula) {
-        this.pelicula = pelicula;
+    public void setTmdbId(Long tmdbId) {
+        this.tmdbId = tmdbId;
     }
 
     public Integer getPuntuacion() {
@@ -73,20 +60,20 @@ public class Valoracion {
         this.puntuacion = puntuacion;
     }
 
+    public boolean isVisto() {
+        return visto;
+    }
+
+    public void setVisto(boolean visto) {
+        this.visto = visto;
+    }
+
     public String getResena() {
         return resena;
     }
 
     public void setResena(String resena) {
         this.resena = resena;
-    }
-
-    public Plataforma getPlataforma() {
-        return plataforma;
-    }
-
-    public void setPlataforma(Plataforma plataforma) {
-        this.plataforma = plataforma;
     }
 
     public LocalDate getFechaVista() {
@@ -97,7 +84,6 @@ public class Valoracion {
         this.fechaVista = fechaVista;
     }
 
-    // --- LÓGICA AUTOMÁTICA ---
     @PrePersist
     public void prePersist() {
         if (this.fechaVista == null) {

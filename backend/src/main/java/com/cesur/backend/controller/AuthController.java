@@ -39,11 +39,11 @@ public class AuthController {
             );
 
             UserDetails user = usuarioRepository.findByEmail(request.getEmail()).orElseThrow();
-            String token = jwtService.getToken(user);
+            String token = jwtService.generateToken(user);
 
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Credenciales incorrectas o usuario no encontrado");
+            return ResponseEntity.status(401).body("Credenciales incorrectas");
         }
     }
 
@@ -51,7 +51,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!?])(?=\\S+$).{8,}$";
         if (request.getPassword() == null || !request.getPassword().matches(regex)) {
-            return ResponseEntity.badRequest().body("La contraseña debe tener: Mayúscula, minúscula, número, símbolo y 8 caracteres.");
+            return ResponseEntity.badRequest().body("La contraseña no cumple los requisitos.");
         }
 
         Usuario user = new Usuario();
@@ -65,12 +65,10 @@ public class AuthController {
         try {
             usuarioRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body("Error: El email o el nombre de usuario ya están en uso.");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error interno del servidor: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error: Email o usuario ya en uso.");
         }
 
-        String token = jwtService.getToken(user);
+        String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new AuthResponse(token));
     }
 }
@@ -106,9 +104,7 @@ class RegisterRequest {
 
 class AuthResponse {
     private String token;
-
     public AuthResponse(String token) { this.token = token; }
-
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 }

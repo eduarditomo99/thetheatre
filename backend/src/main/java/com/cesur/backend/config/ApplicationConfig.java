@@ -15,26 +15,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class ApplicationConfig {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRepository repository;
 
-    public ApplicationConfig(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public ApplicationConfig(UsuarioRepository repository) {
+        this.repository = repository;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findByEmail(username)
+        return username -> repository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        // CORRECCIÓN: Pasamos el UserDetailsService al constructor
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
-
-        // Y luego le asignamos el codificador de contraseñas
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 

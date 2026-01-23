@@ -1,5 +1,6 @@
 package com.cesur.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,43 +10,32 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "usuarios", uniqueConstraints = {@UniqueConstraint(columnNames = {"username"}), @UniqueConstraint(columnNames = {"email"})})
+@Table(name = "usuarios")
 public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    private String nombre;
-    private String apellidos;
-
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;
+    private String nombre;
+    private String apellidos;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // --- CONSTRUCTORES MANUALES ---
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private List<Valoracion> valoraciones;
 
     public Usuario() {
     }
-
-    public Usuario(Long id, String username, String nombre, String apellidos, String email, String password, Role role) {
-        this.id = id;
-        this.username = username;
-        this.nombre = nombre;
-        this.apellidos = apellidos;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
-
-    // --- MÉTODOS OBLIGATORIOS DE USERDETAILS (Los que daban el error) ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -59,7 +49,15 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username; // Devuelve el nickname
+        return email;
+    }
+
+    public String getNick() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override
@@ -82,8 +80,6 @@ public class Usuario implements UserDetails {
         return true;
     }
 
-    // --- GETTERS Y SETTERS MANUALES (Para el resto de campos) ---
-
     public Long getId() {
         return id;
     }
@@ -92,8 +88,16 @@ public class Usuario implements UserDetails {
         this.id = id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getNombre() {
@@ -112,23 +116,19 @@ public class Usuario implements UserDetails {
         this.apellidos = apellidos;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Role getRole() {
         return role;
     }
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public List<Valoracion> getValoraciones() {
+        return valoraciones;
+    }
+
+    public void setValoraciones(List<Valoracion> valoraciones) {
+        this.valoraciones = valoraciones;
     }
 }

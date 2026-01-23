@@ -1,54 +1,56 @@
 package com.cesur.backend.service;
 
-import com.cesur.backend.model.Pelicula;
 import com.cesur.backend.model.Usuario;
 import com.cesur.backend.model.Valoracion;
-import com.cesur.backend.repository.PeliculaRepository;
 import com.cesur.backend.repository.UsuarioRepository;
 import com.cesur.backend.repository.ValoracionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ValoracionService {
 
-    private final ValoracionRepository valoracionRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final PeliculaRepository peliculaRepository;
+    @Autowired
+    private ValoracionRepository valoracionRepository;
 
-    // Constructor manual (ya que no usamos Lombok @RequiredArgsConstructor)
-    public ValoracionService(ValoracionRepository valoracionRepository,
-                             UsuarioRepository usuarioRepository,
-                             PeliculaRepository peliculaRepository) {
-        this.valoracionRepository = valoracionRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.peliculaRepository = peliculaRepository;
-    }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public Valoracion crearValoracion(String emailUsuario, Long peliculaId, Valoracion nuevaValoracion) {
-        // 1. Buscamos al usuario por su email (que viene del Token)
-        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+    public Valoracion crearValoracion(String email, Long tmdbId, Valoracion datosNuevos) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Buscamos la película
-        Pelicula pelicula = peliculaRepository.findById(peliculaId)
-                .orElseThrow(() -> new RuntimeException("Película no encontrada"));
+        Optional<Valoracion> existente = valoracionRepository.findByUsuarioAndTmdbId(usuario, tmdbId);
+        Valoracion valoracion;
 
-        // 3. Comprobamos si ya existe una valoración para no duplicar
-        if (valoracionRepository.findByUsuarioAndPelicula(usuario, pelicula).isPresent()) {
-            throw new RuntimeException("Ya has valorado esta película");
+        if (existente.isPresent()) {
+            valoracion = existente.get();
+        } else {
+            valoracion = new Valoracion();
+            valoracion.setUsuario(usuario);
+            valoracion.setTmdbId(tmdbId);
+            valoracion.setFechaVista(LocalDate.now());
         }
 
-        // 4. Asignamos las relaciones
-        nuevaValoracion.setUsuario(usuario);
-        nuevaValoracion.setPelicula(pelicula);
+        if (datosNuevos.getPuntuacion() != null) {
+            valoracion.setPuntuacion(datosNuevos.getPuntuacion());
+        }
 
-        return valoracionRepository.save(nuevaValoracion);
+        valoracion.setVisto(datosNuevos.isVisto());
+
+        if (datosNuevos.getResena() != null) {
+            valoracion.setResena(datosNuevos.getResena());
+        }
+
+        return valoracionRepository.save(valoracion);
     }
 
-    public List<Valoracion> obtenerHistorialUsuario(String emailUsuario) {
-        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+    public List<Valoracion> obtenerHistorialUsuario(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         return valoracionRepository.findByUsuario(usuario);

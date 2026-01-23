@@ -1,41 +1,92 @@
 package com.cesur.backend.controller;
 
+import com.cesur.backend.model.Usuario;
 import com.cesur.backend.model.Valoracion;
-import com.cesur.backend.service.ValoracionService;
+import com.cesur.backend.repository.UsuarioRepository;
+import com.cesur.backend.repository.ValoracionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/valoraciones")
 public class ValoracionController {
 
-    private final ValoracionService valoracionService;
+    @Autowired
+    private ValoracionRepository valoracionRepository;
 
-    public ValoracionController(ValoracionService valoracionService) {
-        this.valoracionService = valoracionService;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @PostMapping
+    public ResponseEntity<?> guardarValoracion(@RequestBody ValoracionDto dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Optional<Valoracion> existente = valoracionRepository.findByUsuarioAndTmdbId(usuario, dto.getTmdbId());
+        Valoracion valoracion;
+
+        if (existente.isPresent()) {
+            valoracion = existente.get();
+        } else {
+            valoracion = new Valoracion();
+            valoracion.setUsuario(usuario);
+            valoracion.setTmdbId(dto.getTmdbId());
+        }
+
+        valoracion.setPuntuacion(dto.getPuntuacion());
+        valoracion.setVisto(dto.isVisto());
+        valoracion.setResena(dto.getResena());
+
+        valoracionRepository.save(valoracion);
+        return ResponseEntity.ok(valoracion);
     }
 
-    // POST: Marcar película como vista / puntuar
-    // URL: /api/valoraciones/pelicula/1
-    @PostMapping("/pelicula/{peliculaId}")
-    public ResponseEntity<Valoracion> valorarPelicula(
-            @PathVariable Long peliculaId,
-            @RequestBody Valoracion valoracion,
-            Principal principal) { // 'principal' contiene el usuario del Token
+    @GetMapping("/pelicula/{tmdbId}")
+    public ResponseEntity<?> obtenerValoracion(@PathVariable Long tmdbId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
 
-        // Obtenemos el email del usuario logueado
-        String email = principal.getName();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Valoracion guardada = valoracionService.crearValoracion(email, peliculaId, valoracion);
-        return ResponseEntity.ok(guardada);
+        Optional<Valoracion> val = valoracionRepository.findByUsuarioAndTmdbId(usuario, tmdbId);
+
+        if (val.isPresent()) {
+            Valoracion v = val.get();
+            ValoracionDto dto = new ValoracionDto();
+            dto.setTmdbId(v.getTmdbId());
+            dto.setPuntuacion(v.getPuntuacion());
+            dto.setVisto(v.isVisto());
+            dto.setResena(v.getResena());
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.ok(null);
+        }
     }
+}
 
-    // GET: Ver mi historial
-    @GetMapping("/mi-historial")
-    public List<Valoracion> verMiHistorial(Principal principal) {
-        return valoracionService.obtenerHistorialUsuario(principal.getName());
-    }
+class ValoracionDto {
+    private Long tmdbId;
+    private Integer puntuacion;
+    private boolean visto;
+    private String resena;
+
+    public ValoracionDto() {}
+
+    public Long getTmdbId() { return tmdbId; }
+    public void setTmdbId(Long tmdbId) { this.tmdbId = tmdbId; }
+    public Integer getPuntuacion() { return puntuacion; }
+    public void setPuntuacion(Integer puntuacion) { this.puntuacion = puntuacion; }
+    public boolean isVisto() { return visto; }
+    public void setVisto(boolean visto) { this.visto = visto; }
+    public String getResena() { return resena; }
+    public void setResena(String resena) { this.resena = resena; }
 }
