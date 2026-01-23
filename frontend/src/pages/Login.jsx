@@ -15,7 +15,7 @@ const EyeOffIcon = () => (
 
 const Login = () => {
     const [isRegistering, setIsRegistering] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // Estado para ver/ocultar contraseña
+    const [showPassword, setShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         username: '',
@@ -31,7 +31,6 @@ const Login = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        // Limpiamos el error cuando el usuario empieza a escribir para dar feedback visual
         if (error) setError('');
     };
 
@@ -41,13 +40,12 @@ const Login = () => {
 
         try {
             if (isRegistering) {
-                // 1. Validar que las contraseñas coinciden
+                // REGISTRO
                 if (formData.password !== formData.confirmPassword) {
                     setError('Las contraseñas no coinciden.');
                     return;
                 }
 
-                // 2. Enviar TODOS los datos al Backend
                 await api.post('/api/auth/register', {
                     username: formData.username,
                     nombre: formData.nombre,
@@ -57,11 +55,11 @@ const Login = () => {
                 });
 
                 alert('¡Cuenta creada con éxito! Ahora inicia sesión.');
-                setIsRegistering(false); // Cambiar a vista de login automáticamente
-                setFormData({ ...formData, password: '', confirmPassword: '' }); // Limpiar passwords
+                setIsRegistering(false);
+                setFormData({ ...formData, password: '', confirmPassword: '' });
 
             } else {
-                // --- LOGIN ---
+                // LOGIN (Usando EMAIL)
                 const response = await api.post('/api/auth/login', {
                     email: formData.email,
                     password: formData.password
@@ -72,16 +70,10 @@ const Login = () => {
             }
         } catch (err) {
             console.error(err);
-
-            // Manejo específico de errores
             if (err.response) {
-                // Si es Login y falla (403 o 401)
                 if (!isRegistering && (err.response.status === 403 || err.response.status === 401)) {
                     setError('Contraseña o correo incorrectos.');
-                }
-                // Si es Registro y el backend devuelve un mensaje (ej: "Email ya existe")
-                else if (err.response.data) {
-                    // A veces el mensaje viene directo o como objeto
+                } else if (err.response.data) {
                     setError(typeof err.response.data === 'string' ? err.response.data : 'Error en el registro. Verifica los datos.');
                 } else {
                     setError('Ocurrió un error. Inténtalo de nuevo.');
@@ -106,8 +98,6 @@ const Login = () => {
                 {error && <div className="error-msg">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-
-                    {/* CAMPOS SOLO PARA REGISTRO */}
                     {isRegistering && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
@@ -126,7 +116,6 @@ const Login = () => {
                         </motion.div>
                     )}
 
-                    {/* CAMPOS COMUNES */}
                     <div className="input-group">
                         <input
                             type="email"
@@ -155,7 +144,6 @@ const Login = () => {
                         </button>
                     </div>
 
-                    {/* CAMPO CONFIRMAR CONTRASEÑA (SOLO REGISTRO) */}
                     {isRegistering && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
@@ -189,7 +177,7 @@ const Login = () => {
                         className="link-btn"
                         onClick={() => {
                             setIsRegistering(!isRegistering);
-                            setError(''); // Limpiar errores al cambiar de modo
+                            setError('');
                         }}
                     >
                         {isRegistering ? 'Inicia sesión' : 'Regístrate aquí'}

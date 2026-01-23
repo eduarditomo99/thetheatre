@@ -1,33 +1,51 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { tmdbApi } from '../services/api';
+import { tmdbApi, api } from '../services/api';
+import './MovieDetail.css';
 
 const MovieDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+
     const [movie, setMovie] = useState(null);
     const [cast, setCast] = useState([]);
     const [crew, setCrew] = useState({ directors: [], writers: [] });
-    const navigate = useNavigate();
+
+    const [userRating, setUserRating] = useState(0);
+    const [isWatched, setIsWatched] = useState(false);
+    const [loadingInteraction, setLoadingInteraction] = useState(false);
+
     const imageUrl = "https://image.tmdb.org/t/p/original";
+    const posterUrl = "https://image.tmdb.org/t/p/w500";
     const profileUrl = "https://image.tmdb.org/t/p/w185";
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+
         const fetchData = async () => {
             try {
-                const detailRes = await tmdbApi.get(`/movie/${id}?language=es-ES`);
+                const detailRes = await tmdbApi.get(`/movie/${id}`);
                 setMovie(detailRes.data);
 
-                const creditsRes = await tmdbApi.get(`/movie/${id}/credits?language=es-ES`);
-
+                const creditsRes = await tmdbApi.get(`/movie/${id}/credits`);
                 setCast(creditsRes.data.cast.slice(0, 10));
 
-                const directors = creditsRes.data.crew.filter(person => person.job === 'Director');
-                const writers = creditsRes.data.crew.filter(person => person.department === 'Writing' || person.job === 'Screenplay' || person.job === 'Writer');
-
+                const directors = creditsRes.data.crew.filter(p => p.job === 'Director');
+                const writers = creditsRes.data.crew.filter(p => p.department === 'Writing' || p.job === 'Screenplay' || p.job === 'Writer');
                 const uniqueWriters = Array.from(new Set(writers.map(a => a.id)))
                     .map(id => writers.find(a => a.id === id));
-
                 setCrew({ directors, writers: uniqueWriters });
+
+                try {
+                    const myInteraction = await api.get(`/api/valoraciones/pelicula/${id}`);
+                    if (myInteraction.data) {
+                        setIsWatched(myInteraction.data.visto);
+                        setUserRating(myInteraction.data.puntuacion || 0);
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+
             } catch (error) {
                 console.error(error);
             }
@@ -35,7 +53,35 @@ const MovieDetail = () => {
         fetchData();
     }, [id]);
 
-    if (!movie) return <div style={{ color: 'white', padding: 50, background: '#141414', height: '100vh' }}>Cargando...</div>;
+    const saveInteraction = async (newWatchedState, newRating) => {
+        setLoadingInteraction(true);
+        try {
+            const payload = {
+                tmdbId: movie.id,
+                puntuacion: newRating,
+                visto: newWatchedState
+            };
+
+            await api.post('/api/valoraciones', payload);
+
+            setIsWatched(newWatchedState);
+            setUserRating(newRating);
+
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar. Asegúrate de haber iniciado sesión.");
+        } finally {
+            setLoadingInteraction(false);
+        }
+    };
+
+    const handleToggleWatched = () => {
+        saveInteraction(!isWatched, userRating);
+    };
+
+    const handleRate = (rate) => {
+        saveInteraction(true, rate);
+    };
 
     const PersonLink = ({ person }) => (
         <div className="person-hover-container">
@@ -50,61 +96,85 @@ const MovieDetail = () => {
         </div>
     );
 
+    if (!movie) return <div className="loading-screen">Cargando...</div>;
+
     return (
-        <div style={{
-            backgroundImage: `linear-gradient(to right, rgba(20,20,20,1) 20%, rgba(20,20,20,0.7)), url(${imageUrl}${movie.backdrop_path})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            minHeight: '100vh',
-            color: 'white',
-            padding: '50px',
-            paddingTop: '100px'
+        <div className="movie-detail-container" style={{
+            backgroundImage: `linear-gradient(to right, rgba(20,20,20,1) 20%, rgba(20,20,20,0.6)), url(${imageUrl}${movie.backdrop_path})`
         }}>
-            <button onClick={() => navigate('/home')} style={{
-                padding: '10px 20px', cursor: 'pointer', marginBottom: 30, background: '#333', color: 'white', border: 'none', borderRadius: '4px'
-            }}> ⬅ Volver </button>
+            <button onClick={() => navigate('/home')} className="back-btn"> ⬅ Volver </button>
 
-            <div style={{ display: 'flex', gap: '50px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                    style={{ borderRadius: '10px', boxShadow: '0 0 20px rgba(0,0,0,0.5)', maxWidth: '300px', width: '100%' }}
-                    alt={movie.title}
-                />
+            <div className="detail-content">
+                <div className="poster-section">
+                    <img
+                        src={`${posterUrl}${movie.poster_path}`}
+                        className="detail-poster"
+                        alt={movie.title}
+                    />
 
-                <div style={{ maxWidth: '800px' }}>
-                    <h1 style={{ fontSize: '3.5rem', marginBottom: '10px', lineHeight: 1.1 }}>{movie.title}</h1>
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '20px', fontSize: '1.1rem', color: '#ccc' }}>
-                        <span style={{ color: '#46d369', fontWeight: 'bold' }}>Puntuación: {Math.round(movie.vote_average * 10)}%</span>
-                        <span>{movie.release_date.split('-')[0]}</span>
+                    <div className="user-actions-card">
+                        <h3>Tu Actividad</h3>
+                        <button
+                            className={`btn-watch ${isWatched ? 'watched' : ''}`}
+                            onClick={handleToggleWatched}
+                            disabled={loadingInteraction}
+                        >
+                            {isWatched ? '✅ Visto' : '👁 Marcar como Visto'}
+                        </button>
+
+                        <div className="rating-area">
+                            <span>Tu nota: </span>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                                <span
+                                    key={star}
+                                    className={`star ${star <= userRating ? 'filled' : ''}`}
+                                    onClick={() => handleRate(star)}
+                                    style={{ cursor: 'pointer', fontSize: '1.2rem', color: star <= userRating ? '#fca311' : '#555' }}
+                                >
+                                    ★
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="info-section">
+                    <h1 className="movie-title-large">{movie.title}</h1>
+
+                    <div className="meta-data">
+                        <span className="score-tag">TMDB: {Math.round(movie.vote_average * 10)}%</span>
+                        <span>{movie.release_date?.split('-')[0]}</span>
                         <span>{movie.runtime} min</span>
                     </div>
 
-                    <p style={{ lineHeight: '1.6', fontSize: '1.2rem', marginBottom: '30px' }}>{movie.overview}</p>
+                    <p className="overview-text">{movie.overview}</p>
 
-                    <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '5px' }}>Director:</h3>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            {crew.directors.map(d => <PersonLink key={d.id} person={d} />)}
+                    <div className="credits-section">
+                        <div className="credit-group">
+                            <h3>Director:</h3>
+                            <div className="credit-list">
+                                {crew.directors.map(d => <PersonLink key={d.id} person={d} />)}
+                            </div>
                         </div>
-                    </div>
 
-                    <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '5px' }}>Guionistas:</h3>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            {crew.writers.length > 0
-                                ? crew.writers.map(w => <PersonLink key={w.id} person={w} />)
-                                : <span>Desconocido</span>}
+                        <div className="credit-group">
+                            <h3>Guionistas:</h3>
+                            <div className="credit-list">
+                                {crew.writers.length > 0
+                                    ? crew.writers.map(w => <PersonLink key={w.id} person={w} />)
+                                    : <span>Desconocido</span>}
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '10px' }}>Reparto Principal:</h3>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            {cast.map(actor => (
-                                <div key={actor.id} style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 15px', borderRadius: '20px' }}>
-                                    <PersonLink person={actor} />
-                                </div>
-                            ))}
+                        <div className="credit-group">
+                            <h3>Reparto:</h3>
+                            <div className="cast-chips">
+                                {cast.map(actor => (
+                                    <div key={actor.id} className="cast-chip">
+                                        <PersonLink person={actor} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
