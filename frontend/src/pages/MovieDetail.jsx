@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tmdbApi } from '../services/api';
 
 const MovieDetail = () => {
@@ -9,42 +9,50 @@ const MovieDetail = () => {
     const [crew, setCrew] = useState({ directors: [], writers: [] });
     const navigate = useNavigate();
     const imageUrl = "https://image.tmdb.org/t/p/original";
+    const profileUrl = "https://image.tmdb.org/t/p/w185";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1. Detalles de la película
                 const detailRes = await tmdbApi.get(`/movie/${id}?language=es-ES`);
                 setMovie(detailRes.data);
 
-                // 2. Créditos (Actores y Equipo)
                 const creditsRes = await tmdbApi.get(`/movie/${id}/credits?language=es-ES`);
 
-                // Filtramos Actores (Top 10)
                 setCast(creditsRes.data.cast.slice(0, 10));
 
-                // Filtramos Equipo
                 const directors = creditsRes.data.crew.filter(person => person.job === 'Director');
                 const writers = creditsRes.data.crew.filter(person => person.department === 'Writing' || person.job === 'Screenplay' || person.job === 'Writer');
 
-                // Eliminamos duplicados en guionistas
                 const uniqueWriters = Array.from(new Set(writers.map(a => a.id)))
                     .map(id => writers.find(a => a.id === id));
 
                 setCrew({ directors, writers: uniqueWriters });
-
             } catch (error) {
-                console.error("Error cargando detalles:", error);
+                console.error(error);
             }
         };
         fetchData();
     }, [id]);
 
-    if (!movie) return <div style={{ color: 'white', padding: 50, background: '#111', height: '100vh' }}>Cargando...</div>;
+    if (!movie) return <div style={{ color: 'white', padding: 50, background: '#141414', height: '100vh' }}>Cargando...</div>;
+
+    const PersonLink = ({ person }) => (
+        <div className="person-hover-container">
+            <Link to={`/person/${person.id}`} className="person-link">
+                {person.name}
+            </Link>
+            {person.profile_path && (
+                <div className="person-tooltip">
+                    <img src={`${profileUrl}${person.profile_path}`} alt={person.name} />
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div style={{
-            backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.9) 20%, rgba(0,0,0,0.6)), url(${imageUrl}${movie.backdrop_path})`,
+            backgroundImage: `linear-gradient(to right, rgba(20,20,20,1) 20%, rgba(20,20,20,0.7)), url(${imageUrl}${movie.backdrop_path})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             minHeight: '100vh',
@@ -74,22 +82,28 @@ const MovieDetail = () => {
                     <p style={{ lineHeight: '1.6', fontSize: '1.2rem', marginBottom: '30px' }}>{movie.overview}</p>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{ color: '#777' }}>Director:</h3>
-                        <p>{crew.directors.map(d => d.name).join(', ')}</p>
+                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '5px' }}>Director:</h3>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {crew.directors.map(d => <PersonLink key={d.id} person={d} />)}
+                        </div>
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{ color: '#777' }}>Guionistas:</h3>
-                        <p>{crew.writers.length > 0 ? crew.writers.map(w => w.name).join(', ') : 'Desconocido'}</p>
+                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '5px' }}>Guionistas:</h3>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {crew.writers.length > 0
+                                ? crew.writers.map(w => <PersonLink key={w.id} person={w} />)
+                                : <span>Desconocido</span>}
+                        </div>
                     </div>
 
                     <div>
-                        <h3 style={{ color: '#777' }}>Reparto Principal:</h3>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+                        <h3 style={{ color: '#777', fontSize: '1rem', marginBottom: '10px' }}>Reparto Principal:</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             {cast.map(actor => (
-                                <span key={actor.id} style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 10px', borderRadius: '20px', fontSize: '0.9rem' }}>
-                                    {actor.name}
-                                </span>
+                                <div key={actor.id} style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 15px', borderRadius: '20px' }}>
+                                    <PersonLink person={actor} />
+                                </div>
                             ))}
                         </div>
                     </div>

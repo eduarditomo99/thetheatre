@@ -1,16 +1,15 @@
 /* =========================================
-   RESET & ESTRUCTURA GENERAL
+   1. RESET & ESTRUCTURA GENERAL
    ========================================= */
 .home-container {
     background-color: #141414;
-    /* Negro Netflix */
     color: white;
     min-height: 100vh;
     overflow-x: hidden;
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* Modo Claro */
+/* --- MODO CLARO --- */
 body.light-mode .home-container,
 body.light-mode .rows-container {
     background-color: #f5f5f5;
@@ -54,15 +53,14 @@ body.light-mode .dropdown-item:hover {
 }
 
 /* =========================================
-   NAVBAR AVANZADO
+   2. NAVBAR
    ========================================= */
 .navbar {
     position: fixed;
     top: 0;
     width: 100%;
-    height: 68px;
+    height: 70px;
     padding: 0 4%;
-    /* Margen lateral responsivo */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -72,25 +70,22 @@ body.light-mode .dropdown-item:hover {
     box-sizing: border-box;
 }
 
-/* Clase que se activa al hacer scroll */
 .nav-black {
     background-color: #141414;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* IZQUIERDA: Logo + Links */
 .nav-left {
     display: flex;
     align-items: center;
     gap: 20px;
     flex: 1;
-    /* Ocupa espacio para empujar el centro */
 }
 
 .logo {
     font-size: 1.8rem;
     font-weight: 800;
     color: #e50914;
-    /* Rojo Netflix o #fca311 Dorado */
     cursor: pointer;
     margin-right: 15px;
     text-transform: uppercase;
@@ -107,10 +102,8 @@ body.light-mode .dropdown-item:hover {
     color: #b3b3b3;
 }
 
-/* CENTRO: Buscador */
 .nav-center {
     flex: 2;
-    /* Más ancho para centrar */
     display: flex;
     justify-content: center;
 }
@@ -119,14 +112,18 @@ body.light-mode .dropdown-item:hover {
     display: flex;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     padding: 5px 10px;
     height: 36px;
     border-radius: 0;
-    /* Estilo cuadrado más serio */
     width: 100%;
-    max-width: 350px;
-    transition: width 0.3s;
+    max-width: 400px;
+    transition: all 0.3s;
+}
+
+.search-box:focus-within {
+    background-color: black;
+    border-color: white;
 }
 
 .search-box svg {
@@ -144,11 +141,6 @@ body.light-mode .dropdown-item:hover {
     font-size: 0.9rem;
 }
 
-.search-box input::placeholder {
-    color: #aaa;
-}
-
-/* DERECHA: Perfil */
 .nav-right {
     flex: 1;
     display: flex;
@@ -170,12 +162,11 @@ body.light-mode .dropdown-item:hover {
     border-radius: 4px;
 }
 
-/* Menú Desplegable */
 .profile-dropdown {
     position: absolute;
     top: 45px;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.95);
     border: 1px solid #333;
     width: 200px;
     padding: 10px 0;
@@ -191,6 +182,7 @@ body.light-mode .dropdown-item:hover {
 
 .dropdown-item:hover {
     text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dropdown-divider {
@@ -201,36 +193,38 @@ body.light-mode .dropdown-item:hover {
 
 .logout {
     font-weight: bold;
+    color: #ff5f5f;
 }
 
 /* =========================================
-   HERO / BANNER GIGANTE
+   3. HERO / BANNER
    ========================================= */
 .hero {
     position: relative;
-    height: 85vh;
-    /* Bastante alto */
+    height: 80vh;
+    width: 100%;
     background-size: cover;
-    background-position: center center;
+    background-position: center top;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
-    /* Centrar verticalmente contenido */
     margin-bottom: 20px;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content {
     margin-left: 4%;
-    padding-top: 100px;
+    padding-top: 80px;
     max-width: 650px;
     z-index: 10;
 }
 
 .hero-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 15px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-    line-height: 1;
+    line-height: 1.1;
 }
 
 .hero-desc {
@@ -286,19 +280,17 @@ body.light-mode .dropdown-item:hover {
 }
 
 /* =========================================
-   LISTAS (ROWS) Y SOLUCIÓN AL HOVER
+   4. LISTAS (ROWS) Y FLECHAS AJUSTADAS
    ========================================= */
 .rows-container {
     position: relative;
     z-index: 20;
     margin-top: -150px;
-    /* Sube las listas sobre el banner */
     padding-bottom: 50px;
 }
 
 .row {
-    margin-bottom: 10px;
-    /* Menos margen entre filas */
+    margin-bottom: 20px;
     padding: 0 4%;
     position: relative;
 }
@@ -306,7 +298,7 @@ body.light-mode .dropdown-item:hover {
 .row h2 {
     font-size: 1.4rem;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
     color: #e5e5e5;
     transition: color 0.3s;
 }
@@ -315,23 +307,20 @@ body.light-mode .dropdown-item:hover {
     color: white;
 }
 
-/* Contenedor relativo para posicionar flechas */
 .row-slider-container {
     position: relative;
 }
 
-/* SOLUCIÓN AL CORTE DEL HOVER: Padding Vertical */
+/* Contenedor de posters */
 .row-posters {
     display: flex;
     overflow-x: scroll;
-    /* Scroll funcional */
     overflow-y: visible;
-    /* Permitir que crezca verticalmente */
-    padding: 40px 0;
-    /* ¡CLAVE! Espacio arriba y abajo para el zoom */
-    margin: -20px 0;
-    /* Compensar el padding visualmente */
-    gap: 10px;
+    padding-top: 40px;
+    padding-bottom: 60px;
+    margin-top: -20px;
+    margin-bottom: -40px;
+    gap: 15px;
     scroll-behavior: smooth;
     scrollbar-width: none;
 }
@@ -340,26 +329,25 @@ body.light-mode .dropdown-item:hover {
     display: none;
 }
 
-/* ITEM INDIVIDUAL */
+/* ITEM PELÍCULA */
 .poster-wrapper {
     flex: 0 0 auto;
-    width: 220px;
-    /* Tamaño escritorio estándar */
+    width: 242px;
+    /* Tamaño +10% */
     cursor: pointer;
     transition: transform 0.3s ease-in-out;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Efecto Hover */
 .poster-wrapper:hover {
     transform: scale(1.15);
-    /* Zoom grande */
     z-index: 99;
-    /* Asegura que quede encima de todo */
 }
 
 .poster-wrapper.large {
-    width: 170px;
+    width: 187px;
 }
 
 .row-poster {
@@ -367,32 +355,33 @@ body.light-mode .dropdown-item:hover {
     border-radius: 4px;
     object-fit: cover;
     display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Título debajo (oculto hasta hover si quieres estilo limpio, o visible siempre) */
+/* Título */
 .movie-title {
-    font-size: 0.8rem;
-    color: #999;
+    font-size: 0.9rem;
+    color: #e5e5e5;
     text-align: center;
-    margin-top: 5px;
+    margin-top: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0.8;
+    opacity: 1;
+    font-weight: 500;
 }
 
 .poster-wrapper:hover .movie-title {
     color: white;
-    opacity: 1;
-    font-weight: bold;
+    font-weight: 700;
 }
 
-/* FLECHAS DE NAVEGACIÓN */
+/* --- FLECHAS DE NAVEGACIÓN (AJUSTADAS A LA IMAGEN) --- */
 .slider-arrow {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 40px;
     width: 50px;
+    height: 136px;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
@@ -401,8 +390,10 @@ body.light-mode .dropdown-item:hover {
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.3s, background 0.2s;
-    height: 100%;
-    /* Cubre toda la altura de la fila */
+}
+
+.row-slider-container.is-large .slider-arrow {
+    height: 280px;
 }
 
 .row:hover .slider-arrow {
@@ -426,9 +417,8 @@ body.light-mode .dropdown-item:hover {
     border-bottom-left-radius: 4px;
 }
 
-
 /* =========================================
-   📱 RESPONSIVE MÓVIL
+   5. RESPONSIVE MÓVIL
    ========================================= */
 @media (max-width: 768px) {
     .navbar {
@@ -442,40 +432,31 @@ body.light-mode .dropdown-item:hover {
     }
 
     .nav-center {
-        flex: 1;
         margin: 0 10px;
         justify-content: flex-end;
     }
 
     .search-box {
-        width: 100%;
-        max-width: 200px;
+        max-width: 160px;
         padding: 5px;
     }
 
-    .search-box input {
-        width: 100%;
-        font-size: 0.8rem;
-    }
-
     .hero {
-        height: 60vh;
+        height: 55vh;
     }
 
     .hero-content {
-        margin-left: 20px;
+        margin-left: 15px;
         padding-top: 60px;
     }
 
     .hero-title {
-        font-size: 2.2rem;
+        font-size: 2rem;
     }
 
     .hero-desc {
         display: none;
     }
-
-    /* Ocultar descripción en móvil para limpiar */
 
     .rows-container {
         margin-top: -50px;
@@ -489,19 +470,83 @@ body.light-mode .dropdown-item:hover {
         display: none !important;
     }
 
-    /* Sin flechas en táctil */
-
     .poster-wrapper {
-        width: 140px;
+        width: 154px;
     }
 
     .poster-wrapper.large {
-        width: 110px;
+        width: 121px;
     }
 
     .poster-wrapper:hover {
         transform: scale(1);
     }
+}
 
-    /* Quitar zoom en móvil para evitar bugs táctiles */
+/* =========================================
+   6. TOOLTIPS DE PERSONAS (NUEVO)
+   ========================================= */
+.person-hover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.person-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.person-link:hover {
+    color: #fca311;
+    text-decoration: underline;
+}
+
+/* El tooltip flotante */
+.person-tooltip {
+    visibility: hidden;
+    position: absolute;
+    bottom: 120%;
+    /* Aparece justo encima del texto */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    padding: 5px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    z-index: 1000;
+    width: 100px;
+    /* Tamaño de la foto flotante */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s;
+    pointer-events: none;
+    /* Evita que el tooltip moleste al hacer clic */
+}
+
+/* Activación al pasar el ratón */
+.person-hover-container:hover .person-tooltip {
+    visibility: visible;
+    opacity: 1;
+    bottom: 140%;
+    /* Animación ligera hacia arriba */
+}
+
+.person-tooltip img {
+    width: 100%;
+    border-radius: 4px;
+    display: block;
+}
+
+/* Flechita decorativa del tooltip */
+.person-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #000 transparent transparent transparent;
 }

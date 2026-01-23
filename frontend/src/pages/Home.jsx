@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { tmdbApi } from '../services/api';
 import './Home.css';
 
-// --- ICONOS ---
+// --- ICONOS SVG ---
 const SearchIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>);
 const UserIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>);
 const ChevronLeft = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>);
@@ -11,17 +11,19 @@ const ChevronRight = () => (<svg width="40" height="40" viewBox="0 0 24 24" fill
 
 const Home = () => {
     const [featuredMovie, setFeaturedMovie] = useState(null);
-    const [categories, setCategories] = useState({ trending: [], topRated: [], action: [], comedy: [], horror: [], romance: [], documentary: [], drama: [] });
+    const [categories, setCategories] = useState({
+        trending: [], topRated: [], action: [], comedy: [], horror: [], romance: [], documentary: [], drama: []
+    });
     const [isScrolled, setIsScrolled] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [showProfileMenu, setShowProfileMenu] = useState(false); // Menú perfil
-    const [darkMode, setDarkMode] = useState(true); // Modo oscuro
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
     const navigate = useNavigate();
 
     const imageUrl = "https://image.tmdb.org/t/p/original";
 
     useEffect(() => {
-        // Cargar datos
+        // 1. Cargar todas las categorías
         const fetchData = async () => {
             try {
                 const [trending, topRated, action, comedy, horror, romance, documentary, drama] = await Promise.all([
@@ -46,19 +48,20 @@ const Home = () => {
                     drama: drama.data.results,
                 });
 
+                // Banner aleatorio
                 const random = Math.floor(Math.random() * trending.data.results.length);
                 setFeaturedMovie(trending.data.results[random]);
             } catch (error) { console.error("Error cargando películas:", error); }
         };
         fetchData();
 
-        // Scroll listener para el header
+        // 2. Listener para scroll del navbar
         const handleScroll = () => setIsScrolled(window.scrollY > 50);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // Efecto para modo oscuro/claro
+    // 3. Efecto para modo oscuro/claro
     useEffect(() => {
         if (darkMode) {
             document.body.classList.remove('light-mode');
@@ -90,7 +93,7 @@ const Home = () => {
                     <span className="nav-link">Películas</span>
                 </div>
 
-                {/* BUSCADOR CENTRADO Y ANCHO */}
+                {/* BUSCADOR */}
                 <div className="nav-center">
                     <form onSubmit={handleSearch} className="search-box">
                         <SearchIcon />
@@ -103,7 +106,7 @@ const Home = () => {
                     </form>
                 </div>
 
-                {/* PERFIL Y MENÚ */}
+                {/* PERFIL */}
                 <div className="nav-right">
                     <div className="profile-container" onClick={() => setShowProfileMenu(!showProfileMenu)}>
                         <UserIcon />
@@ -124,7 +127,7 @@ const Home = () => {
                 </div>
             </nav>
 
-            {/* HERO */}
+            {/* HERO (BANNER PRINCIPAL) */}
             {featuredMovie && (
                 <header
                     className="hero"
@@ -142,9 +145,11 @@ const Home = () => {
                 </header>
             )}
 
-            {/* FILAS DE PELÍCULAS CON FLECHAS */}
+            {/* FILAS DE PELÍCULAS */}
             <div className="rows-container">
+                {/* Tendencias es "isLarge" (Posters verticales) */}
                 <Row title="Tendencias" movies={categories.trending} isLarge />
+
                 <Row title="Mejor Valoradas" movies={categories.topRated} />
                 <Row title="Acción" movies={categories.action} />
                 <Row title="Comedia" movies={categories.comedy} />
@@ -156,11 +161,11 @@ const Home = () => {
     );
 };
 
-// COMPONENTE ROW CON SCROLL HORIZONTAL Y FLECHAS
+// --- COMPONENTE ROW (FILA INDIVIDUAL) ---
 const Row = ({ title, movies, isLarge }) => {
     const base_url = "https://image.tmdb.org/t/p/w500";
     const navigate = useNavigate();
-    const rowRef = useRef(null); // Referencia al contenedor para hacer scroll
+    const rowRef = useRef(null);
 
     const scroll = (offset) => {
         if (rowRef.current) {
@@ -171,8 +176,10 @@ const Row = ({ title, movies, isLarge }) => {
     return (
         <div className="row">
             <h2>{title}</h2>
-            <div className="row-slider-container">
-                {/* FLECHA IZQUIERDA */}
+
+            {/* AQUÍ AÑADIMOS LA CLASE "is-large" SI ES NECESARIO */}
+            <div className={`row-slider-container ${isLarge ? "is-large" : ""}`}>
+
                 <div className="slider-arrow left" onClick={() => scroll(-300)}>
                     <ChevronLeft />
                 </div>
@@ -195,7 +202,6 @@ const Row = ({ title, movies, isLarge }) => {
                     ))}
                 </div>
 
-                {/* FLECHA DERECHA */}
                 <div className="slider-arrow right" onClick={() => scroll(300)}>
                     <ChevronRight />
                 </div>
