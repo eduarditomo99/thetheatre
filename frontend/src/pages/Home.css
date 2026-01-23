@@ -9,49 +9,6 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- MODO CLARO --- */
-body.light-mode .home-container,
-body.light-mode .rows-container {
-    background-color: #f5f5f5;
-    color: #141414;
-}
-
-body.light-mode .movie-title {
-    color: #333;
-}
-
-body.light-mode .row h2 {
-    color: #000;
-}
-
-body.light-mode .navbar {
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-body.light-mode .nav-black {
-    background: white !important;
-}
-
-body.light-mode .search-box {
-    background: #eee;
-    border: 1px solid #ddd;
-}
-
-body.light-mode .search-box input {
-    color: #000;
-}
-
-body.light-mode .profile-dropdown {
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-}
-
-body.light-mode .dropdown-item:hover {
-    background: #eee;
-}
-
 /* =========================================
    2. NAVBAR
    ========================================= */
@@ -162,6 +119,7 @@ body.light-mode .dropdown-item:hover {
     border-radius: 4px;
 }
 
+/* MENÚ DESPLEGABLE */
 .profile-dropdown {
     position: absolute;
     top: 45px;
@@ -180,8 +138,9 @@ body.light-mode .dropdown-item:hover {
     cursor: pointer;
 }
 
+/* QUITO EL SUBRAYADO AQUÍ Y DEJO SOLO EL FONDO GRIS */
 .dropdown-item:hover {
-    text-decoration: underline;
+    text-decoration: none;
     background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -280,7 +239,7 @@ body.light-mode .dropdown-item:hover {
 }
 
 /* =========================================
-   4. LISTAS (ROWS) Y FLECHAS AJUSTADAS
+   4. LISTAS (ROWS)
    ========================================= */
 .rows-container {
     position: relative;
@@ -376,7 +335,7 @@ body.light-mode .dropdown-item:hover {
     font-weight: 700;
 }
 
-/* --- FLECHAS DE NAVEGACIÓN (AJUSTADAS A LA IMAGEN) --- */
+/* --- FLECHAS DE NAVEGACIÓN --- */
 .slider-arrow {
     position: absolute;
     top: 40px;
@@ -484,7 +443,7 @@ body.light-mode .dropdown-item:hover {
 }
 
 /* =========================================
-   6. TOOLTIPS DE PERSONAS (NUEVO)
+   6. TOOLTIPS DE PERSONAS
    ========================================= */
 .person-hover-container {
     position: relative;
@@ -503,12 +462,10 @@ body.light-mode .dropdown-item:hover {
     text-decoration: underline;
 }
 
-/* El tooltip flotante */
 .person-tooltip {
     visibility: hidden;
     position: absolute;
     bottom: 120%;
-    /* Aparece justo encima del texto */
     left: 50%;
     transform: translateX(-50%);
     background-color: #000;
@@ -517,20 +474,16 @@ body.light-mode .dropdown-item:hover {
     border: 1px solid #333;
     z-index: 1000;
     width: 100px;
-    /* Tamaño de la foto flotante */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     opacity: 0;
     transition: opacity 0.3s, bottom 0.3s;
     pointer-events: none;
-    /* Evita que el tooltip moleste al hacer clic */
 }
 
-/* Activación al pasar el ratón */
 .person-hover-container:hover .person-tooltip {
     visibility: visible;
     opacity: 1;
     bottom: 140%;
-    /* Animación ligera hacia arriba */
 }
 
 .person-tooltip img {
@@ -539,7 +492,6 @@ body.light-mode .dropdown-item:hover {
     display: block;
 }
 
-/* Flechita decorativa del tooltip */
 .person-tooltip::after {
     content: "";
     position: absolute;

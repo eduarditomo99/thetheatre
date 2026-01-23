@@ -17,9 +17,8 @@ const Home = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [darkMode, setDarkMode] = useState(true);
-    const navigate = useNavigate();
 
+    const navigate = useNavigate();
     const imageUrl = "https://image.tmdb.org/t/p/original";
 
     useEffect(() => {
@@ -61,15 +60,6 @@ const Home = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // 3. Efecto para modo oscuro/claro
-    useEffect(() => {
-        if (darkMode) {
-            document.body.classList.remove('light-mode');
-        } else {
-            document.body.classList.add('light-mode');
-        }
-    }, [darkMode]);
-
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchTerm.trim()) {
@@ -83,7 +73,7 @@ const Home = () => {
     };
 
     return (
-        <div className={`home-container ${!darkMode ? 'light' : ''}`}>
+        <div className="home-container">
             {/* NAVBAR */}
             <nav className={`navbar ${isScrolled ? "nav-black" : ""}`}>
                 <div className="nav-left">
@@ -114,13 +104,15 @@ const Home = () => {
                         {/* MENÚ DESPLEGABLE */}
                         {showProfileMenu && (
                             <div className="profile-dropdown">
-                                <div className="dropdown-item">👤 Mi Perfil</div>
-                                <div className="dropdown-item">✏️ Modificar Datos</div>
-                                <div className="dropdown-item" onClick={(e) => { e.stopPropagation(); setDarkMode(!darkMode); }}>
-                                    {darkMode ? '☀️ Modo Claro' : '🌙 Modo Oscuro'}
+                                {/* AQUÍ ESTÁ LA REDIRECCIÓN AÑADIDA */}
+                                <div className="dropdown-item" onClick={() => navigate('/profile')}>
+                                    👤 Mi Perfil
                                 </div>
+                                {/* Eliminada la opción de Modificar Datos duplicada y el modo oscuro */}
                                 <div className="dropdown-divider"></div>
-                                <div className="dropdown-item logout" onClick={handleLogout}>Cerrar Sesión</div>
+                                <div className="dropdown-item logout" onClick={handleLogout}>
+                                    Cerrar Sesión
+                                </div>
                             </div>
                         )}
                     </div>
