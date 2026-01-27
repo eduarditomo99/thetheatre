@@ -11,7 +11,8 @@ const MovieDetail = () => {
     const [cast, setCast] = useState([]);
     const [crew, setCrew] = useState({ directors: [], writers: [] });
 
-    const [userRating, setUserRating] = useState(0);
+    const [ratingInput, setRatingInput] = useState("");
+    const [commentInput, setCommentInput] = useState("");
     const [isWatched, setIsWatched] = useState(false);
     const [loadingInteraction, setLoadingInteraction] = useState(false);
 
@@ -40,10 +41,15 @@ const MovieDetail = () => {
                     const myInteraction = await api.get(`/api/valoraciones/pelicula/${id}`);
                     if (myInteraction.data) {
                         setIsWatched(myInteraction.data.visto);
-                        setUserRating(myInteraction.data.puntuacion || 0);
+                        if (myInteraction.data.puntuacion) {
+                            setRatingInput(myInteraction.data.puntuacion.toString().replace('.', ','));
+                        }
+                        if (myInteraction.data.resena) {
+                            setCommentInput(myInteraction.data.resena);
+                        }
                     }
                 } catch (err) {
-                    console.log(err);
+                    console.log("No interaction found");
                 }
 
             } catch (error) {
@@ -53,19 +59,37 @@ const MovieDetail = () => {
         fetchData();
     }, [id]);
 
-    const saveInteraction = async (newWatchedState, newRating) => {
+    const handleRatingChange = (e) => {
+        const val = e.target.value;
+        const regex = /^([0-9](,[0-9]?)?|10)?$/;
+
+        if (regex.test(val)) {
+            setRatingInput(val);
+        }
+    };
+
+    const saveInteraction = async (newWatchedState) => {
         setLoadingInteraction(true);
         try {
+            let numericRating = 0;
+            if (ratingInput) {
+                numericRating = parseFloat(ratingInput.replace(',', '.'));
+            }
+
+            // Si pone nota, automáticamente está vista
+            const finalWatchedState = numericRating > 0 ? true : newWatchedState;
+
             const payload = {
                 tmdbId: movie.id,
-                puntuacion: newRating,
-                visto: newWatchedState
+                puntuacion: numericRating,
+                visto: finalWatchedState,
+                resena: commentInput
             };
 
             await api.post('/api/valoraciones', payload);
 
-            setIsWatched(newWatchedState);
-            setUserRating(newRating);
+            setIsWatched(finalWatchedState);
+            alert("✅ Guardado correctamente");
 
         } catch (error) {
             console.error(error);
@@ -73,14 +97,6 @@ const MovieDetail = () => {
         } finally {
             setLoadingInteraction(false);
         }
-    };
-
-    const handleToggleWatched = () => {
-        saveInteraction(!isWatched, userRating);
-    };
-
-    const handleRate = (rate) => {
-        saveInteraction(true, rate);
     };
 
     const PersonLink = ({ person }) => (
@@ -102,7 +118,7 @@ const MovieDetail = () => {
         <div className="movie-detail-container" style={{
             backgroundImage: `linear-gradient(to right, rgba(20,20,20,1) 20%, rgba(20,20,20,0.6)), url(${imageUrl}${movie.backdrop_path})`
         }}>
-            <button onClick={() => navigate('/home')} className="back-btn"> ⬅ Volver </button>
+            <button onClick={() => navigate(-1)} className="back-btn"> ⬅ Volver </button>
 
             <div className="detail-content">
                 <div className="poster-section">
@@ -114,27 +130,37 @@ const MovieDetail = () => {
 
                     <div className="user-actions-card">
                         <h3>Tu Actividad</h3>
+
+                        <div className="rating-input-container">
+                            <label>Tu Nota (0-10):</label>
+                            <div className="input-wrapper">
+                                <input
+                                    type="text"
+                                    value={ratingInput}
+                                    onChange={handleRatingChange}
+                                    placeholder="Ej: 8,5"
+                                    className="rating-box"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="comment-container">
+                            <label>Reseña:</label>
+                            <textarea
+                                className="comment-box"
+                                placeholder="Escribe tu opinión aquí..."
+                                value={commentInput}
+                                onChange={(e) => setCommentInput(e.target.value)}
+                            />
+                        </div>
+
                         <button
                             className={`btn-watch ${isWatched ? 'watched' : ''}`}
-                            onClick={handleToggleWatched}
+                            onClick={() => saveInteraction(true)}
                             disabled={loadingInteraction}
                         >
-                            {isWatched ? '✅ Visto' : '👁 Marcar como Visto'}
+                            {loadingInteraction ? 'Guardando...' : (isWatched ? '✅ Actualizar Datos' : '💾 Guardar / Marcar Visto')}
                         </button>
-
-                        <div className="rating-area">
-                            <span>Tu nota: </span>
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                                <span
-                                    key={star}
-                                    className={`star ${star <= userRating ? 'filled' : ''}`}
-                                    onClick={() => handleRate(star)}
-                                    style={{ cursor: 'pointer', fontSize: '1.2rem', color: star <= userRating ? '#fca311' : '#555' }}
-                                >
-                                    ★
-                                </span>
-                            ))}
-                        </div>
                     </div>
                 </div>
 

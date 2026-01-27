@@ -1,25 +1,34 @@
 package com.cesur.backend.controller;
 
 import com.cesur.backend.model.Usuario;
+import com.cesur.backend.model.Valoracion;
 import com.cesur.backend.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.cesur.backend.repository.ValoracionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ValoracionRepository valoracionRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @GetMapping
-    public List<Usuario> obtenerTodos() {
-        return usuarioRepository.findAll();
+    public UsuarioController(UsuarioRepository usuarioRepository,
+                             ValoracionRepository valoracionRepository,
+                             PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.valoracionRepository = valoracionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/perfil")
@@ -27,57 +36,93 @@ public class UsuarioController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        Usuario user = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        return ResponseEntity.ok(new UserProfileDto(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getNombre(),
-                user.getApellidos()
-        ));
+        List<Valoracion> valoraciones = valoracionRepository.findByUsuario(usuario);
+
+        PerfilDto perfil = new PerfilDto();
+        perfil.setUsername(usuario.getNick() != null ? usuario.getNick() : "Usuario");
+        perfil.setNombre(usuario.getNombre());
+        perfil.setApellidos(usuario.getApellidos());
+        perfil.setEmail(usuario.getEmail());
+        // Enviamos la foto al frontend (Base64)
+        // Asegúrate de tener el getter/setter en el modelo Usuario para fotoPerfil
+        // perfil.setFotoPerfil(usuario.getFotoPerfil());
+
+        List<PeliculaVistaDto> pelisDto = valoraciones.stream().map(v -> {
+            PeliculaVistaDto dto = new PeliculaVistaDto();
+            dto.setId(v.getId()); // ID de la valoración para poder borrarla
+            dto.setTmdbId(v.getTmdbId());
+            dto.setPuntuacion(v.getPuntuacion());
+            dto.setVisto(v.isVisto());
+            dto.setComentario(v.getResena());
+            return dto;
+        }).collect(Collectors.toList());
+
+        perfil.setHistorial(pelisDto);
+
+        return ResponseEntity.ok(perfil);
     }
 
     @PutMapping("/perfil")
-    public ResponseEntity<?> actualizarMiPerfil(@RequestBody UserProfileDto datosNuevos) {
+    public ResponseEntity<?> actualizarPerfil(@RequestBody Map<String, String> datos) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        Usuario user = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        user.setNombre(datosNuevos.getNombre());
-        user.setApellidos(datosNuevos.getApellidos());
+        if (datos.containsKey("nombre")) usuario.setNombre(datos.get("nombre"));
+        if (datos.containsKey("apellidos")) usuario.setApellidos(datos.get("apellidos"));
 
-        usuarioRepository.save(user);
+        // Aquí deberías tener el campo en tu modelo Usuario.java
+        // if (datos.containsKey("fotoPerfil")) usuario.setFotoPerfil(datos.get("fotoPerfil"));
 
-        return ResponseEntity.ok("Perfil actualizado con éxito");
+        if (datos.containsKey("password") && !datos.get("password").isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(datos.get("password")));
+        }
+
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok("Perfil actualizado correctamente");
     }
 }
 
-class UserProfileDto {
-    private Long id;
+class PerfilDto {
     private String username;
-    private String email;
     private String nombre;
     private String apellidos;
+    private String email;
+    private String fotoPerfil;
+    private List<PeliculaVistaDto> historial = new ArrayList<>();
 
-    public UserProfileDto() {}
-
-    public UserProfileDto(Long id, String username, String email, String nombre, String apellidos) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.nombre = nombre;
-        this.apellidos = apellidos;
-    }
-
-    public Long getId() { return id; }
     public String getUsername() { return username; }
-    public String getEmail() { return email; }
+    public void setUsername(String username) { this.username = username; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getApellidos() { return apellidos; }
     public void setApellidos(String apellidos) { this.apellidos = apellidos; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
+    public List<PeliculaVistaDto> getHistorial() { return historial; }
+    public void setHistorial(List<PeliculaVistaDto> historial) { this.historial = historial; }
+}
+
+class PeliculaVistaDto {
+    private Long id;
+    private Long tmdbId;
+    private Integer puntuacion;
+    private boolean visto;
+    private String comentario;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getTmdbId() { return tmdbId; }
+    public void setTmdbId(Long tmdbId) { this.tmdbId = tmdbId; }
+    public Integer getPuntuacion() { return puntuacion; }
+    public void setPuntuacion(Integer puntuacion) { this.puntuacion = puntuacion; }
+    public boolean isVisto() { return visto; }
+    public void setVisto(boolean visto) { this.visto = visto; }
+    public String getComentario() { return comentario; }
+    public void setComentario(String comentario) { this.comentario = comentario; }
 }

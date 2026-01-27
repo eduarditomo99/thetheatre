@@ -16,11 +16,8 @@ import java.util.Optional;
 @RequestMapping("/api/valoraciones")
 public class ValoracionController {
 
-    @Autowired
-    private ValoracionRepository valoracionRepository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    @Autowired private ValoracionRepository valoracionRepository;
+    @Autowired private UsuarioRepository usuarioRepository;
 
     @PostMapping
     public ResponseEntity<?> guardarValoracion(@RequestBody ValoracionDto dto) {
@@ -70,6 +67,20 @@ public class ValoracionController {
         } else {
             return ResponseEntity.ok(null);
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarValoracion(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        // Verificamos que la valoración pertenezca al usuario logueado por seguridad
+        Optional<Valoracion> val = valoracionRepository.findById(id);
+        if(val.isPresent() && val.get().getUsuario().getEmail().equals(email)) {
+            valoracionRepository.deleteById(id);
+            return ResponseEntity.ok("Eliminado");
+        }
+        return ResponseEntity.status(403).body("No autorizado");
     }
 }
 

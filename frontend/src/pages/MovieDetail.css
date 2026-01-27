@@ -5,16 +5,13 @@
     min-height: 100vh;
     color: white;
     background-color: #141414;
-    /* Fondo de seguridad */
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
-    /* Padding superior para que no choque con el Navbar fijo */
     padding-top: 80px;
     position: relative;
 }
 
-/* Botón de volver */
 .back-btn {
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
@@ -35,19 +32,20 @@
 }
 
 /* =========================================
-   LAYOUT (COLUMNAS)
+   LAYOUT DESKTOP
    ========================================= */
 .detail-content {
     display: flex;
+    flex-direction: row;
     gap: 50px;
     padding: 0 4% 50px 4%;
     align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-/* --- COLUMNA IZQUIERDA (POSTER) --- */
 .poster-section {
-    flex: 0 0 300px;
-    /* Ancho fijo de 300px */
+    flex: 0 0 320px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -56,33 +54,81 @@
 .detail-poster {
     width: 100%;
     border-radius: 8px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-    /* Sombra elegante */
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
 }
 
-/* TARJETA DE ACCIONES (VISTO / PUNTUAR) */
+/* CAJA DE ACCIONES */
 .user-actions-card {
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(20, 20, 20, 0.9);
     border: 1px solid #333;
-    padding: 20px;
+    padding: 25px;
     border-radius: 8px;
-    text-align: center;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
 }
 
 .user-actions-card h3 {
     margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1rem;
     color: #ccc;
+    font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    margin-bottom: 15px;
 }
 
-/* Botón de Visto */
-.btn-watch {
+/* INPUT DE NOTA */
+.rating-input-container {
+    margin-bottom: 15px;
+}
+
+.rating-input-container label,
+.comment-container label {
+    display: block;
+    color: #999;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.rating-box {
     width: 100%;
     padding: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    background-color: #000;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 4px;
+}
+
+.rating-box:focus {
+    border-color: #e50914;
+    outline: none;
+}
+
+/* INPUT COMENTARIO */
+.comment-container {
+    margin-bottom: 15px;
+}
+
+.comment-box {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    background-color: #000;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 4px;
+    resize: none;
+    font-family: inherit;
+}
+
+.comment-box:focus {
+    border-color: #e50914;
+    outline: none;
+}
+
+.btn-watch {
+    width: 100%;
+    padding: 14px;
     border: none;
     border-radius: 4px;
     font-weight: bold;
@@ -91,7 +137,6 @@
     background-color: #333;
     color: white;
     transition: background 0.3s;
-    margin-bottom: 20px;
 }
 
 .btn-watch:hover {
@@ -100,99 +145,60 @@
 
 .btn-watch.watched {
     background-color: #46d369;
-    /* Verde éxito */
     color: black;
 }
 
-/* Estrellas */
-.rating-area {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: wrap;
-}
-
-.rating-area span:first-child {
-    display: block;
-    width: 100%;
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #aaa;
-}
-
-.star {
-    transition: transform 0.2s;
-}
-
-.star:hover {
-    transform: scale(1.3);
-}
-
-/* --- COLUMNA DERECHA (INFO) --- */
+/* INFO SECTION */
 .info-section {
     flex: 1;
-    /* Ocupa el resto del espacio */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .movie-title-large {
     font-size: 3.5rem;
     font-weight: 800;
-    margin: 0 0 10px 0;
+    margin: 0 0 15px 0;
     line-height: 1.1;
 }
 
-/* Metadatos (Año, Duración, Nota) */
 .meta-data {
     display: flex;
     align-items: center;
     gap: 20px;
     font-size: 1.1rem;
-    color: #e5e5e5;
-    margin-bottom: 25px;
+    color: #ddd;
+    margin-bottom: 30px;
 }
 
 .score-tag {
     color: #46d369;
     border: 1px solid #46d369;
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
     font-weight: bold;
-    font-size: 0.9rem;
 }
 
 .overview-text {
     font-size: 1.2rem;
     line-height: 1.6;
     margin-bottom: 40px;
-    max-width: 800px;
-    color: #ddd;
+    max-width: 900px;
+    color: #eee;
 }
 
-/* CRÉDITOS (Director, Guion, Reparto) */
+/* CRÉDITOS */
 .credits-section {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
 .credit-group h3 {
-    color: #888;
+    color: #999;
     font-size: 1rem;
-    margin-bottom: 8px;
-    font-weight: normal;
+    margin-bottom: 10px;
 }
 
-.credit-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-/* Chips para el reparto */
 .cast-chips {
     display: flex;
     flex-wrap: wrap;
@@ -201,17 +207,11 @@
 
 .cast-chip {
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.95rem;
-    transition: background 0.2s;
 }
 
-.cast-chip:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Tooltips y enlaces de personas (reutiliza lógica visual) */
 .person-link {
     color: white;
     text-decoration: none;
@@ -219,33 +219,33 @@
 
 .person-link:hover {
     color: #fca311;
-    /* Dorado */
     text-decoration: underline;
 }
 
-/* =========================================
-   RESPONSIVE (MÓVIL)
-   ========================================= */
+/* RESPONSIVE MÓVIL */
 @media (max-width: 900px) {
     .detail-content {
         flex-direction: column;
         align-items: center;
+        gap: 30px;
     }
 
     .poster-section {
         width: 100%;
-        max-width: 350px;
-        /* Limitar ancho en móvil */
+        max-width: 380px;
         flex: none;
     }
 
     .info-section {
         width: 100%;
         text-align: left;
-        /* O center si prefieres */
     }
 
     .movie-title-large {
         font-size: 2.5rem;
+    }
+
+    .overview-text {
+        font-size: 1rem;
     }
 }

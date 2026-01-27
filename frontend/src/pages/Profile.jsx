@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api'; // Asegúrate de que esto importa tu instancia axios configurada
+import { api, tmdbApi } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
-    const [activeTab, setActiveTab] = useState('info'); // 'info', 'movies', 'social'
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
+    const [profile, setProfile] = useState(null);
+    const [activeTab, setActiveTab] = useState('movies');
+    const [movieDetails, setMovieDetails] = useState({});
     const [errorMsg, setErrorMsg] = useState('');
 
-    // Estados para editar
-    const [editMode, setEditMode] = useState(false);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({
+        nombre: '', apellidos: '', password: '', confirmPassword: '', fotoPerfil: ''
+    });
 
     useEffect(() => {
         loadProfile();
@@ -21,21 +20,29 @@ const Profile = () => {
 
     const loadProfile = async () => {
         try {
-            const res = await api.get('/usuarios/perfil');
-            setUser(res.data);
+            const res = await api.get('/api/usuarios/perfil');
+            setProfile(res.data);
             setFormData({
-                nombre: res.data.nombre,
-                apellidos: res.data.apellidos,
-                fotoPerfil: res.data.fotoPerfil
+                nombre: res.data.nombre || '',
+                apellidos: res.data.apellidos || '',
+                password: '',
+                confirmPassword: '',
+                fotoPerfil: res.data.fotoPerfil || ''
             });
+
+            if (res.data.historial) {
+                res.data.historial.forEach(async (item) => {
+                    try {
+                        const tmdbRes = await tmdbApi.get(`/movie/${item.tmdbId}`);
+                        setMovieDetails(prev => ({ ...prev, [item.tmdbId]: tmdbRes.data }));
+                    } catch (err) { console.error(err); }
+                });
+            }
         } catch (error) {
-            console.error("Error cargando perfil:", error);
-            // NO REDIRIGIMOS AUTOMÁTICAMENTE para que veas el error
             setErrorMsg("No se pudo cargar el perfil. ¿Has iniciado sesión?");
         }
     };
 
-    // Convertir imagen a Base64
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -47,143 +54,155 @@ const Profile = () => {
         }
     };
 
-    const handleSave = async () => {
-        try {
-            await api.put('/usuarios/perfil', formData);
-            setEditMode(false);
-            loadProfile(); // Recargar datos
-        } catch (error) {
-            alert("Error al guardar");
-        }
-    };
-
-    const handleSearchUsers = async (e) => {
+    const handleUpdateProfile = async (e) => {
         e.preventDefault();
+        if (formData.password && formData.password !== formData.confirmPassword) {
+            alert("Las contraseñas no coinciden");
+            return;
+        }
         try {
-            const res = await api.get(`/usuarios/buscar?query=${searchQuery}`);
-            setSearchResults(res.data);
-        } catch (error) {
-            console.error(error);
+            await api.put('/api/usuarios/perfil', {
+                nombre: formData.nombre,
+                apellidos: formData.apellidos,
+                password: formData.password,
+                fotoPerfil: formData.fotoPerfil
+            });
+            alert("Perfil actualizado correctamente");
+            loadProfile();
+        } catch (err) {
+            alert("Error al actualizar perfil");
         }
     };
 
-    if (errorMsg) return <div className="profile-error">{errorMsg} <button onClick={() => navigate('/')}>Ir al Login</button></div>;
-    if (!user) return <div className="loading">Cargando...</div>;
+    const handleDeleteMovie = async (e, idValoracion) => {
+        e.stopPropagation();
+        if (window.confirm("¿Seguro que quieres eliminar esta película de tu historial?")) {
+            try {
+                await api.delete(`/api/valoraciones/${idValoracion}`);
+                loadProfile();
+            } catch (err) {
+                alert("Error al eliminar");
+            }
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/');
+    };
+
+    if (errorMsg) return <div className="profile-error">{errorMsg} <button onClick={() => navigate('/')} className="btn-logout">Ir al Login</button></div>;
+    if (!profile) return <div className="loading-screen">Cargando perfil...</div>;
 
     return (
-        <div className="profile-page-container">
-            <div className="profile-sidebar">
-                <div className="avatar-section">
-                    <img
-                        src={formData.fotoPerfil || "https://via.placeholder.com/150"}
-                        alt="Perfil"
-                        className="profile-avatar-big"
-                    />
-                    {editMode && (
-                        <label className="upload-btn">
+        <div className="profile-wrapper">
+
+            <header className="profile-header-bar">
+                <button onClick={() => navigate(-1)} className="back-btn-profile"> ⬅ Volver </button>
+                <h1 className="header-brand">THE THEATRE</h1>
+            </header>
+
+            <div className="profile-content-container">
+                <aside className="profile-sidebar">
+                    <div className="sidebar-header">
+                        <div className="avatar-large">
+                            {formData.fotoPerfil ? (
+                                <img src={formData.fotoPerfil} alt="Avatar" className="avatar-img-real" />
+                            ) : (
+                                <span>{profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}</span>
+                            )}
+                        </div>
+
+                        <label className="edit-avatar-btn">
                             📷 Cambiar Foto
                             <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
                         </label>
-                    )}
-                </div>
-                <h2>{user.username}</h2>
-                <p>{user.email}</p>
 
-                <div className="stats-row">
-                    <div className="stat"><span>0</span> Seguidores</div>
-                    <div className="stat"><span>0</span> Seguidos</div>
-                    <div className="stat"><span>{user.interacciones ? user.interacciones.length : 0}</span> Pelis</div>
-                </div>
+                        <h2 className="username-display">{profile.username}</h2>
+                        <p className="email-display">{profile.email}</p>
+                    </div>
 
-                <div className="menu-buttons">
-                    <button onClick={() => setActiveTab('info')} className={activeTab === 'info' ? 'active' : ''}>Mis Datos</button>
-                    <button onClick={() => setActiveTab('movies')} className={activeTab === 'movies' ? 'active' : ''}>Mis Películas</button>
-                    <button onClick={() => setActiveTab('social')} className={activeTab === 'social' ? 'active' : ''}>Buscar Gente</button>
-                    <button onClick={() => { localStorage.removeItem('token'); navigate('/'); }} className="logout-btn">Cerrar Sesión</button>
-                </div>
-            </div>
+                    <nav className="sidebar-nav">
+                        <button className={`nav-item ${activeTab === 'movies' ? 'active' : ''}`} onClick={() => setActiveTab('movies')}>
+                            🎬 Mis Películas
+                        </button>
+                        <button className={`nav-item ${activeTab === 'social' ? 'active' : ''}`} onClick={() => setActiveTab('social')}>
+                            👥 Social
+                        </button>
+                        <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+                            ⚙️ Ajustes
+                        </button>
+                    </nav>
 
-            <div className="profile-main-content">
+                    <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
+                </aside>
 
-                {/* PESTAÑA INFO */}
-                {activeTab === 'info' && (
-                    <div className="tab-content">
-                        <h3>Información Personal</h3>
-                        <div className="form-group">
-                            <label>Nombre</label>
-                            <input
-                                disabled={!editMode}
-                                value={formData.nombre}
-                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Apellidos</label>
-                            <input
-                                disabled={!editMode}
-                                value={formData.apellidos}
-                                onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                            />
-                        </div>
+                <main className="profile-main">
+                    {activeTab === 'movies' && (
+                        <div className="tab-section">
+                            <h3>Películas Vistas ({profile.historial ? profile.historial.length : 0})</h3>
+                            <div className="movies-grid">
+                                {(!profile.historial || profile.historial.length === 0) && (
+                                    <p className="empty-msg">No has guardado ninguna película aún.</p>
+                                )}
 
-                        {!editMode ? (
-                            <button className="action-btn" onClick={() => setEditMode(true)}>Editar Perfil</button>
-                        ) : (
-                            <div className="edit-actions">
-                                <button className="save-btn" onClick={handleSave}>Guardar</button>
-                                <button className="cancel-btn" onClick={() => { setEditMode(false); loadProfile() }}>Cancelar</button>
+                                {profile.historial && profile.historial.map((item) => {
+                                    const movieData = movieDetails[item.tmdbId];
+                                    return (
+                                        <div key={item.id} className="profile-movie-card" onClick={() => navigate(`/movie/${item.tmdbId}`)}>
+                                            {movieData ? (
+                                                <img src={`https://image.tmdb.org/t/p/w200${movieData.poster_path}`} alt="poster" />
+                                            ) : <div className="placeholder-poster">...</div>}
+
+                                            <div className="delete-btn-overlay" onClick={(e) => handleDeleteMovie(e, item.id)}>🗑️</div>
+
+                                            <div className="card-overlay">
+                                                {item.puntuacion > 0 && <span className="rate-badge">★ {item.puntuacion}</span>}
+                                                {item.visto && <span className="view-badge">Visto</span>}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {/* PESTAÑA PELÍCULAS */}
-                {activeTab === 'movies' && (
-                    <div className="tab-content">
-                        <h3>Historial de Películas</h3>
-                        <div className="movies-grid-profile">
-                            {user.interacciones && user.interacciones.map(movie => (
-                                <div key={movie.id} className="movie-card-mini">
-                                    <img src={`https://image.tmdb.org/t/p/w200${movie.posterPath}`} alt={movie.titulo} />
-                                    <div className="movie-info-mini">
-                                        <h4>{movie.titulo}</h4>
-                                        {movie.visto && <span className="tag-seen">👁 Visto</span>}
-                                        {movie.puntuacion > 0 && <span className="tag-rate">★ {movie.puntuacion}</span>}
-                                        <p className="comment-preview">"{movie.comentario}"</p>
-                                    </div>
-                                </div>
-                            ))}
-                            {(!user.interacciones || user.interacciones.length === 0) && <p>Aún no has guardado ninguna película.</p>}
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* PESTAÑA SOCIAL */}
-                {activeTab === 'social' && (
-                    <div className="tab-content">
-                        <h3>Buscar Usuarios</h3>
-                        <form onSubmit={handleSearchUsers} className="search-users-form">
-                            <input
-                                type="text"
-                                placeholder="Buscar por nombre de usuario..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <button type="submit">Buscar</button>
-                        </form>
-
-                        <div className="users-list">
-                            {searchResults.map(u => (
-                                <div key={u.id} className="user-card">
-                                    <img src={u.fotoPerfil || "https://via.placeholder.com/50"} alt="Avatar" />
-                                    <span>{u.username}</span>
-                                    <button className="follow-btn">Seguir (Pronto)</button>
-                                </div>
-                            ))}
+                    {activeTab === 'social' && (
+                        <div className="tab-section">
+                            <h3>Comunidad</h3>
+                            <div className="placeholder-box"><p>Próximamente...</p></div>
                         </div>
-                    </div>
-                )}
+                    )}
 
+                    {activeTab === 'settings' && (
+                        <div className="tab-section">
+                            <h3>Editar Perfil</h3>
+                            <form onSubmit={handleUpdateProfile} className="settings-form">
+                                <div className="input-group">
+                                    <label>Nombre</label>
+                                    <input type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Apellidos</label>
+                                    <input type="text" value={formData.apellidos} onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })} />
+                                </div>
+
+                                <hr className="divider" />
+                                <h4>Cambiar Contraseña</h4>
+                                <div className="input-group">
+                                    <label>Nueva Contraseña</label>
+                                    <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="Dejar en blanco para no cambiar" />
+                                </div>
+                                <div className="input-group">
+                                    <label>Confirmar Contraseña</label>
+                                    <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} />
+                                </div>
+
+                                <button type="submit" className="save-btn">Guardar Cambios</button>
+                            </form>
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );
