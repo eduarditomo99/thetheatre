@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Base de datos
+  db:
+    image: postgres:15
+    container_name: cine-db
+    environment:
+      POSTGRES_DB: theatredb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Patitos123??xx  # <--- PON LA TUYA
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Backend (Java)
+  backend:
+    build: ./backend
+    container_name: cine-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Docker usa el nombre del servicio 'db' como host
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/theatredb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Patitos123??xx  # <--- PON LA TUYA
+      # Configuración JWT (opcional si la tienes hardcodeada, mejor por env)
+    depends_on:
+      - db
+
+  # Frontend (React)
+  frontend:
+    build: ./frontend
+    container_name: cine-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://46.27.95.129:8080
+
+volumes:
+  postgres_data:
