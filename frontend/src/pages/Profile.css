@@ -1,53 +1,49 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 .profile-wrapper {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background-color: #141414;
     color: white;
-}
-
-.profile-error,
-.loading-screen {
-    padding-top: 100px;
-    text-align: center;
-    color: white;
+    width: 100%;
 }
 
 .profile-header-bar {
-    background-color: rgb(20, 20, 20);
-    padding: 15px 30px;
+    background-color: black;
+    padding: 15px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     border-bottom: 1px solid #333;
     z-index: 10;
+    min-height: 60px;
 }
 
 .header-brand {
-    margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #e50914;
     font-weight: 900;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .back-btn-profile {
     position: absolute;
     left: 20px;
     background: transparent;
-    border: 1px solid #aaa;
+    border: 1px solid #555;
     color: #ccc;
-    padding: 8px 15px;
+    padding: 6px 15px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    transition: 0.3s;
-}
-
-.back-btn-profile:hover {
-    border-color: white;
-    color: white;
+    font-size: 0.9rem;
 }
 
 .profile-content-container {
@@ -56,11 +52,9 @@
 }
 
 .profile-sidebar {
-    width: 280px;
+    width: 260px;
     background-color: #000;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
+    padding: 30px 20px;
     border-right: 1px solid #333;
     flex-shrink: 0;
 }
@@ -71,8 +65,8 @@
 }
 
 .avatar-large {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     background: #e50914;
     border-radius: 50%;
     margin: 0 auto 15px;
@@ -80,10 +74,7 @@
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    font-weight: bold;
-    color: white;
-    border: 4px solid #1f1f1f;
-    position: relative;
+    border: 3px solid #1f1f1f;
     overflow: hidden;
 }
 
@@ -113,66 +104,60 @@
 }
 
 .username-display {
-    margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: bold;
 }
 
 .email-display {
-    margin: 5px 0 0;
     color: #777;
     font-size: 0.9rem;
+    word-break: break-all;
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    flex: 1;
+    gap: 8px;
 }
 
 .nav-item {
     background: transparent;
     border: none;
     color: #aaa;
-    padding: 15px 20px;
+    padding: 12px 15px;
     text-align: left;
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
+    border-radius: 4px;
+    transition: 0.2s;
 }
 
 .nav-item:hover {
-    background-color: #1f1f1f;
+    background: #1f1f1f;
     color: white;
 }
 
 .nav-item.active {
-    background-color: #333;
+    background: #333;
     color: white;
     font-weight: bold;
-    border-left: 4px solid #e50914;
+    border-left: 3px solid #e50914;
 }
 
 .btn-logout {
-    margin-top: 30px;
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
     background: transparent;
     border: 1px solid #555;
     color: #ccc;
-    padding: 12px;
-    border-radius: 4px;
     cursor: pointer;
-    font-weight: bold;
-}
-
-.btn-logout:hover {
-    border-color: #e50914;
-    color: #e50914;
+    border-radius: 4px;
 }
 
 .profile-main {
     flex: 1;
-    padding: 40px 60px;
+    padding: 30px 40px;
     background-color: #141414;
 }
 
@@ -185,24 +170,23 @@
 
 .movies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
 }
 
 .profile-movie-card {
+    aspect-ratio: 2/3;
+    background: #222;
+    border-radius: 4px;
+    overflow: hidden;
     position: relative;
     cursor: pointer;
     transition: transform 0.2s;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #222;
-    aspect-ratio: 2/3;
 }
 
 .profile-movie-card:hover {
     transform: scale(1.05);
     z-index: 2;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 }
 
 .profile-movie-card img {
@@ -221,115 +205,100 @@
     cursor: pointer;
     display: none;
     z-index: 5;
+    color: white;
 }
 
 .profile-movie-card:hover .delete-btn-overlay {
     display: block;
 }
 
-.delete-btn-overlay:hover {
-    background: #e50914;
-}
-
-.card-overlay {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    align-items: flex-end;
-}
-
-.rate-badge {
-    background: #f5c518;
-    color: black;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
-
-.view-badge {
-    background: rgba(0, 0, 0, 0.8);
-    color: #46d369;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    border: 1px solid #46d369;
-}
-
 .settings-form {
-    max-width: 500px;
-}
-
-.input-group {
-    margin-bottom: 20px;
+    max-width: 400px;
 }
 
 .input-group label {
     display: block;
     margin-bottom: 8px;
-    color: #aaa;
+    color: #bbb;
 }
 
 .input-group input {
     width: 100%;
-    padding: 12px;
-    background: #222;
-    border: 1px solid #333;
-    color: #ddd;
+    padding: 10px;
+    background: #333;
+    border: 1px solid #444;
+    color: white;
     border-radius: 4px;
-}
-
-.divider {
-    border-top: 1px solid #333;
-    border-bottom: none;
-    margin: 30px 0;
 }
 
 .save-btn {
     background: #e50914;
     color: white;
+    padding: 12px;
+    width: 100%;
     border: none;
-    padding: 12px 24px;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 4px;
-    width: 100%;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
+    .profile-header-bar {
+        justify-content: space-between;
+        padding: 10px 15px;
+    }
+
+    .back-btn-profile {
+        position: static;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    .header-brand {
+        font-size: 1.2rem;
+        flex-grow: 1;
+        text-align: right;
+    }
+
     .profile-content-container {
         flex-direction: column;
     }
 
     .profile-sidebar {
         width: 100%;
-        height: auto;
+        padding: 20px 15px;
         border-right: none;
         border-bottom: 1px solid #333;
-        padding: 30px 20px;
     }
 
     .sidebar-header {
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 10px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+        margin: 0;
+        border-width: 2px;
     }
 
     .sidebar-nav {
         flex-direction: row;
         overflow-x: auto;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
+        padding-bottom: 5px;
+        gap: 10px;
     }
 
     .nav-item {
         white-space: nowrap;
-        border-radius: 20px;
         background: #222;
-        padding: 10px 20px;
+        border-radius: 20px;
+        padding: 8px 16px;
         font-size: 0.9rem;
     }
 
@@ -338,12 +307,16 @@
         background: #e50914;
     }
 
+    .btn-logout {
+        display: none;
+    }
+
     .profile-main {
-        padding: 20px;
+        padding: 20px 15px;
     }
 
     .movies-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
     }
 }

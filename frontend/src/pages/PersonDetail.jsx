@@ -18,7 +18,8 @@ const PersonDetail = () => {
                 const creditsRes = await tmdbApi.get(`/person/${id}/combined_credits?language=es-ES`);
 
                 const sortedCredits = creditsRes.data.cast
-                    .filter(item => item.poster_path)
+                    // CORRECCIÓN AQUÍ: Filtramos para que SOLO pasen las películas
+                    .filter(item => item.poster_path && item.media_type === 'movie')
                     .sort((a, b) => b.popularity - a.popularity);
 
                 setCredits(sortedCredits);
@@ -58,7 +59,7 @@ const PersonDetail = () => {
                 </div>
             </div>
 
-            <h2>Filmografía y Apariciones</h2>
+            <h2>Filmografía (Películas)</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '20px', marginTop: '20px' }}>
                 {credits.map(item => (
                     <div

@@ -21,6 +21,7 @@ const MovieDetail = () => {
     const profileUrl = "https://image.tmdb.org/t/p/w185";
 
     useEffect(() => {
+        setMovie(null);
         window.scrollTo(0, 0);
 
         const fetchData = async () => {
@@ -36,6 +37,10 @@ const MovieDetail = () => {
                 const uniqueWriters = Array.from(new Set(writers.map(a => a.id)))
                     .map(id => writers.find(a => a.id === id));
                 setCrew({ directors, writers: uniqueWriters });
+
+                setRatingInput("");
+                setCommentInput("");
+                setIsWatched(false);
 
                 try {
                     const myInteraction = await api.get(`/api/valoraciones/pelicula/${id}`);
@@ -53,7 +58,7 @@ const MovieDetail = () => {
                 }
 
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching movie:", error);
             }
         };
         fetchData();
@@ -76,7 +81,6 @@ const MovieDetail = () => {
                 numericRating = parseFloat(ratingInput.replace(',', '.'));
             }
 
-            // Si pone nota, automáticamente está vista
             const finalWatchedState = numericRating > 0 ? true : newWatchedState;
 
             const payload = {
@@ -112,7 +116,7 @@ const MovieDetail = () => {
         </div>
     );
 
-    if (!movie) return <div className="loading-screen">Cargando...</div>;
+    if (!movie) return <div className="loading-screen" style={{ color: 'white', paddingTop: '100px', textAlign: 'center' }}>Cargando...</div>;
 
     return (
         <div className="movie-detail-container" style={{
@@ -178,14 +182,14 @@ const MovieDetail = () => {
                     <div className="credits-section">
                         <div className="credit-group">
                             <h3>Director:</h3>
-                            <div className="credit-list">
+                            <div className="cast-chips">
                                 {crew.directors.map(d => <PersonLink key={d.id} person={d} />)}
                             </div>
                         </div>
 
                         <div className="credit-group">
                             <h3>Guionistas:</h3>
-                            <div className="credit-list">
+                            <div className="cast-chips">
                                 {crew.writers.length > 0
                                     ? crew.writers.map(w => <PersonLink key={w.id} person={w} />)
                                     : <span>Desconocido</span>}
@@ -196,9 +200,7 @@ const MovieDetail = () => {
                             <h3>Reparto:</h3>
                             <div className="cast-chips">
                                 {cast.map(actor => (
-                                    <div key={actor.id} className="cast-chip">
-                                        <PersonLink person={actor} />
-                                    </div>
+                                    <PersonLink key={actor.id} person={actor} />
                                 ))}
                             </div>
                         </div>

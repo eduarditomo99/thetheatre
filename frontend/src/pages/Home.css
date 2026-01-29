@@ -1,20 +1,22 @@
-/* =========================================
-   1. RESET & ESTRUCTURA GENERAL
-   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 .home-container {
     background-color: #141414;
     color: white;
     min-height: 100vh;
+    width: 100%;
     overflow-x: hidden;
-    transition: background-color 0.3s, color 0.3s;
+    padding-bottom: 50px;
 }
 
-/* =========================================
-   2. NAVBAR
-   ========================================= */
 .navbar {
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
     height: 70px;
     padding: 0 4%;
@@ -22,9 +24,8 @@
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-    transition: background-color 0.5s ease-in-out;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, transparent);
-    box-sizing: border-box;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+    transition: background-color 0.3s;
 }
 
 .nav-black {
@@ -36,23 +37,25 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    flex: 1;
 }
 
 .logo {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: #e50914;
     cursor: pointer;
-    margin-right: 15px;
     text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .nav-link {
     font-size: 0.9rem;
     cursor: pointer;
     font-weight: 500;
+    color: #e5e5e5;
     transition: color 0.3s;
+    text-decoration: none;
 }
 
 .nav-link:hover {
@@ -60,21 +63,20 @@
 }
 
 .nav-center {
-    flex: 2;
+    flex: 1;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+    margin: 0 20px;
 }
 
 .search-box {
     display: flex;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 5px 10px;
-    height: 36px;
-    border-radius: 0;
-    width: 100%;
-    max-width: 400px;
+    height: 34px;
+    border-radius: 4px;
     transition: all 0.3s;
 }
 
@@ -84,7 +86,7 @@
 }
 
 .search-box svg {
-    width: 18px;
+    width: 16px;
     color: white;
 }
 
@@ -94,16 +96,14 @@
     color: white;
     margin-left: 10px;
     outline: none;
-    width: 100%;
+    width: 150px;
     font-size: 0.9rem;
 }
 
 .nav-right {
-    flex: 1;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
 .profile-container {
@@ -113,51 +113,45 @@
     align-items: center;
 }
 
+.profile-container img,
 .profile-container svg {
     width: 32px;
     height: 32px;
     border-radius: 4px;
+    object-fit: cover;
 }
 
-/* MENÚ DESPLEGABLE */
 .profile-dropdown {
     position: absolute;
     top: 45px;
     right: 0;
     background-color: rgba(0, 0, 0, 0.95);
     border: 1px solid #333;
-    width: 200px;
+    width: 160px;
     padding: 10px 0;
     border-radius: 4px;
+    display: flex;
+    flex-direction: column;
 }
 
 .dropdown-item {
-    padding: 10px 20px;
-    font-size: 0.85rem;
+    padding: 12px 15px;
+    font-size: 0.9rem;
     color: #fff;
-    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
 }
 
-/* QUITO EL SUBRAYADO AQUÍ Y DEJO SOLO EL FONDO GRIS */
 .dropdown-item:hover {
-    text-decoration: none;
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.dropdown-divider {
-    height: 1px;
-    background: #333;
-    margin: 5px 0;
-}
-
 .logout {
-    font-weight: bold;
     color: #ff5f5f;
+    border-top: 1px solid #333;
+    margin-top: 5px;
 }
 
-/* =========================================
-   3. HERO / BANNER
-   ========================================= */
 .hero {
     position: relative;
     height: 80vh;
@@ -168,13 +162,13 @@
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content {
     margin-left: 4%;
     padding-top: 80px;
-    max-width: 650px;
+    max-width: 600px;
+    width: 90%;
     z-index: 10;
 }
 
@@ -182,7 +176,7 @@
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 15px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     line-height: 1.1;
 }
 
@@ -192,11 +186,13 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     margin-bottom: 25px;
     font-weight: 500;
+    max-width: 90%;
 }
 
 .hero-buttons {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -204,12 +200,16 @@
     border: none;
     font-weight: 700;
     border-radius: 4px;
-    padding: 0.8rem 2.4rem;
-    font-size: 1.1rem;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
+    gap: 8px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.btn:hover {
+    transform: scale(1.05);
 }
 
 .btn-play {
@@ -217,130 +217,94 @@
     color: black;
 }
 
-.btn-play:hover {
-    background-color: rgba(255, 255, 255, 0.75);
-}
-
 .btn-info {
     background-color: rgba(109, 109, 110, 0.7);
     color: white;
 }
 
-.btn-info:hover {
-    background-color: rgba(109, 109, 110, 0.4);
-}
-
 .hero-fade-bottom {
-    height: 10rem;
-    background-image: linear-gradient(180deg, transparent, rgba(20, 20, 20, 0.6), #141414);
+    height: 7.4rem;
+    background-image: linear-gradient(180deg, transparent, rgba(20, 20, 20, 0.61), #141414);
     position: absolute;
     bottom: 0;
     width: 100%;
 }
 
-/* =========================================
-   4. LISTAS (ROWS)
-   ========================================= */
 .rows-container {
     position: relative;
     z-index: 20;
-    margin-top: -150px;
-    padding-bottom: 50px;
+    margin-top: -100px;
 }
 
 .row {
-    margin-bottom: 20px;
-    padding: 0 4%;
-    position: relative;
+    margin-bottom: 30px;
+    padding-left: 4%;
+    padding-right: 0;
 }
 
 .row h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 0px;
+    margin-bottom: 10px;
     color: #e5e5e5;
-    transition: color 0.3s;
 }
 
-.row:hover h2 {
-    color: white;
-}
-
-.row-slider-container {
-    position: relative;
-}
-
-/* Contenedor de posters */
 .row-posters {
     display: flex;
-    overflow-x: scroll;
-    overflow-y: visible;
-    padding-top: 40px;
-    padding-bottom: 60px;
-    margin-top: -20px;
-    margin-bottom: -40px;
-    gap: 15px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    padding: 10px 0;
+    gap: 10px;
     scroll-behavior: smooth;
-    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 .row-posters::-webkit-scrollbar {
     display: none;
 }
 
-/* ITEM PELÍCULA */
 .poster-wrapper {
     flex: 0 0 auto;
-    width: 242px;
-    /* Tamaño +10% */
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out;
+    width: 160px;
+    transition: transform 0.3s;
     position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-.poster-wrapper:hover {
-    transform: scale(1.15);
-    z-index: 99;
 }
 
 .poster-wrapper.large {
-    width: 187px;
+    width: 200px;
+}
+
+@media (min-width: 769px) {
+    .poster-wrapper:hover {
+        transform: scale(1.1);
+        z-index: 10;
+    }
 }
 
 .row-poster {
     width: 100%;
+    height: auto;
     border-radius: 4px;
     object-fit: cover;
     display: block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Título */
 .movie-title {
-    font-size: 0.9rem;
-    color: #e5e5e5;
-    text-align: center;
-    margin-top: 8px;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    color: #ccc;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 1;
-    font-weight: 500;
+    text-align: center;
 }
 
-.poster-wrapper:hover .movie-title {
-    color: white;
-    font-weight: 700;
-}
-
-/* --- FLECHAS DE NAVEGACIÓN --- */
 .slider-arrow {
     position: absolute;
-    top: 40px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 50px;
-    height: 136px;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
@@ -348,124 +312,31 @@
     z-index: 100;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.3s, background 0.2s;
-}
-
-.row-slider-container.is-large .slider-arrow {
-    height: 280px;
+    transition: opacity 0.3s;
 }
 
 .row:hover .slider-arrow {
     opacity: 1;
 }
 
-.slider-arrow:hover {
-    background: rgba(0, 0, 0, 0.8);
-    transform: scale(1.1);
-}
-
 .slider-arrow.left {
-    left: -50px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
+    left: 0;
 }
 
 .slider-arrow.right {
-    right: -50px;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
+    right: 0;
 }
 
-/* =========================================
-   5. RESPONSIVE MÓVIL
-   ========================================= */
-@media (max-width: 768px) {
-    .navbar {
-        padding: 0 15px;
-        height: 60px;
-    }
-
-    .nav-link,
-    .nav-left span {
-        display: none;
-    }
-
-    .nav-center {
-        margin: 0 10px;
-        justify-content: flex-end;
-    }
-
-    .search-box {
-        max-width: 160px;
-        padding: 5px;
-    }
-
-    .hero {
-        height: 55vh;
-    }
-
-    .hero-content {
-        margin-left: 15px;
-        padding-top: 60px;
-    }
-
-    .hero-title {
-        font-size: 2rem;
-    }
-
-    .hero-desc {
-        display: none;
-    }
-
-    .rows-container {
-        margin-top: -50px;
-    }
-
-    .row {
-        padding: 0 15px;
-    }
-
-    .slider-arrow {
-        display: none !important;
-    }
-
-    .poster-wrapper {
-        width: 154px;
-    }
-
-    .poster-wrapper.large {
-        width: 121px;
-    }
-
-    .poster-wrapper:hover {
-        transform: scale(1);
-    }
-}
-
-/* =========================================
-   6. TOOLTIPS DE PERSONAS
-   ========================================= */
 .person-hover-container {
     position: relative;
     display: inline-block;
 }
 
-.person-link {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.person-link:hover {
-    color: #fca311;
-    text-decoration: underline;
-}
-
 .person-tooltip {
     visibility: hidden;
+    opacity: 0;
     position: absolute;
-    bottom: 120%;
+    bottom: 110%;
     left: 50%;
     transform: translateX(-50%);
     background-color: #000;
@@ -473,32 +344,84 @@
     border-radius: 8px;
     border: 1px solid #333;
     z-index: 1000;
-    width: 100px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    transition: opacity 0.3s, bottom 0.3s;
+    width: 90px;
+    transition: opacity 0.2s;
     pointer-events: none;
 }
 
 .person-hover-container:hover .person-tooltip {
     visibility: visible;
     opacity: 1;
-    bottom: 140%;
 }
 
 .person-tooltip img {
     width: 100%;
     border-radius: 4px;
-    display: block;
 }
 
-.person-tooltip::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #000 transparent transparent transparent;
+@media (max-width: 900px) {
+    .navbar {
+        height: 60px;
+        padding: 0 15px;
+        background-color: #141414;
+    }
+
+    .nav-link,
+    .nav-center,
+    .search-box {
+        display: none;
+    }
+
+    .logo {
+        font-size: 1.3rem;
+    }
+
+    .hero {
+        height: 60vh;
+        background-position: center center;
+    }
+
+    .hero-content {
+        margin-left: 20px;
+        padding-top: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    .hero-desc {
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .rows-container {
+        margin-top: 0;
+        padding-top: 20px;
+    }
+
+    .row {
+        margin-bottom: 25px;
+        padding-left: 15px;
+    }
+
+    .poster-wrapper {
+        width: 120px;
+    }
+
+    .poster-wrapper.large {
+        width: 140px;
+    }
+
+    .slider-arrow {
+        display: none !important;
+    }
 }
