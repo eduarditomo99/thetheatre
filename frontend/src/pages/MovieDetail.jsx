@@ -9,7 +9,7 @@ const MovieDetail = () => {
 
     const [movie, setMovie] = useState(null);
     const [cast, setCast] = useState([]);
-    const [crew, setCrew] = useState({ directors: [], writers: [] });
+    const [crew, setCrew] = useState({ directors: [], writers: [], musicians: [] });
 
     const [ratingInput, setRatingInput] = useState("");
     const [commentInput, setCommentInput] = useState("");
@@ -34,9 +34,15 @@ const MovieDetail = () => {
 
                 const directors = creditsRes.data.crew.filter(p => p.job === 'Director');
                 const writers = creditsRes.data.crew.filter(p => p.department === 'Writing' || p.job === 'Screenplay' || p.job === 'Writer');
+                const musicians = creditsRes.data.crew.filter(p => p.job === 'Original Music Composer' || p.job === 'Music');
+
                 const uniqueWriters = Array.from(new Set(writers.map(a => a.id)))
                     .map(id => writers.find(a => a.id === id));
-                setCrew({ directors, writers: uniqueWriters });
+
+                const uniqueMusicians = Array.from(new Set(musicians.map(a => a.id)))
+                    .map(id => musicians.find(a => a.id === id));
+
+                setCrew({ directors, writers: uniqueWriters, musicians: uniqueMusicians });
 
                 setRatingInput("");
                 setCommentInput("");
@@ -67,7 +73,6 @@ const MovieDetail = () => {
     const handleRatingChange = (e) => {
         const val = e.target.value;
         const regex = /^([0-9](,[0-9]?)?|10)?$/;
-
         if (regex.test(val)) {
             setRatingInput(val);
         }
@@ -91,7 +96,6 @@ const MovieDetail = () => {
             };
 
             await api.post('/api/valoraciones', payload);
-
             setIsWatched(finalWatchedState);
             alert("✅ Guardado correctamente");
 
@@ -108,6 +112,25 @@ const MovieDetail = () => {
             <Link to={`/person/${person.id}`} className="person-link">
                 {person.name}
             </Link>
+            {person.profile_path && (
+                <div className="person-tooltip">
+                    <img src={`${profileUrl}${person.profile_path}`} alt={person.name} />
+                </div>
+            )}
+        </div>
+    );
+
+    // Enlace directo a la búsqueda interna de Spotify
+    const SpotifyLink = ({ person }) => (
+        <div className="person-hover-container">
+            <a
+                href={`https://open.spotify.com/search/${encodeURIComponent(person.name)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="person-link"
+            >
+                {person.name}
+            </a>
             {person.profile_path && (
                 <div className="person-tooltip">
                     <img src={`${profileUrl}${person.profile_path}`} alt={person.name} />
@@ -134,7 +157,6 @@ const MovieDetail = () => {
 
                     <div className="user-actions-card">
                         <h3>Tu Actividad</h3>
-
                         <div className="rating-input-container">
                             <label>Tu Nota (0-10):</label>
                             <div className="input-wrapper">
@@ -195,6 +217,15 @@ const MovieDetail = () => {
                                     : <span>Desconocido</span>}
                             </div>
                         </div>
+
+                        {crew.musicians.length > 0 && (
+                            <div className="credit-group">
+                                <h3>Banda Sonora:</h3>
+                                <div className="cast-chips">
+                                    {crew.musicians.map(m => <SpotifyLink key={m.id} person={m} />)}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="credit-group">
                             <h3>Reparto:</h3>

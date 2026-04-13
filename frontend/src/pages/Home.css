@@ -106,6 +106,47 @@
     gap: 15px;
 }
 
+.mobile-search-icon {
+    display: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobile-search-bar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: #141414;
+    padding: 10px 15px;
+    z-index: 999;
+    border-bottom: 1px solid #333;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.mobile-search-bar input {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
 .profile-container {
     position: relative;
     cursor: pointer;
@@ -370,6 +411,11 @@
     .nav-center,
     .search-box {
         display: none;
+    }
+
+    .mobile-search-icon {
+        display: block;
+        color: white;
     }
 
     .logo {
