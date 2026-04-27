@@ -1,6 +1,6 @@
 # 🎬 The Theatre - Plataforma de Gestión de Cine
 
-**The Theatre** es una aplicación web full-stack diseñada para la gestión integral de un cine. Este proyecto combina un backend robusto y seguro en Java con una interfaz moderna y rápida en React, todo orquestado mediante contenedores Docker para facilitar su despliegue en cualquier máquina.
+**The Theatre** es una aplicación web full-stack diseñada para la gestión integral de perfil de cinefilos. Este proyecto combina un backend robusto y seguro en Java con una interfaz moderna y rápida en React, todo orquestado mediante contenedores Docker para facilitar su despliegue en cualquier máquina.
 
 ---
 
