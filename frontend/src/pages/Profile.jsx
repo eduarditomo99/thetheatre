@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { api, tmdbApi } from '../services/api';
 import './Profile.css';
 
+// Componentes del Módulo Social
+import SocialFeed from './SocialFeed';
+import UserSearch from './UserSearch';
+
 const Profile = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [activeTab, setActiveTab] = useState('movies');
+    const [socialTab, setSocialTab] = useState('feed'); // Sub-pestaña social
     const [movieDetails, setMovieDetails] = useState({});
     const [errorMsg, setErrorMsg] = useState('');
 
@@ -169,8 +174,24 @@ const Profile = () => {
 
                     {activeTab === 'social' && (
                         <div className="tab-section">
-                            <h3>Comunidad</h3>
-                            <div className="placeholder-box"><p>Próximamente...</p></div>
+                            <div className="flex gap-6 mb-8 border-b border-[#333] pb-4 justify-center">
+                                <button 
+                                    className={`px-8 py-3 text-lg font-bold transition rounded border border-transparent ${socialTab === 'feed' ? 'bg-[#222] text-[#e50914] border-[#e50914]' : 'bg-transparent text-[#aaa] hover:bg-[#1f1f1f] hover:text-white border-[#333]'}`}
+                                    onClick={() => setSocialTab('feed')}
+                                >
+                                    Mi Muro
+                                </button>
+                                <button 
+                                    className={`px-8 py-3 text-lg font-bold transition rounded border border-transparent ${socialTab === 'search' ? 'bg-[#222] text-[#e50914] border-[#e50914]' : 'bg-transparent text-[#aaa] hover:bg-[#1f1f1f] hover:text-white border-[#333]'}`}
+                                    onClick={() => setSocialTab('search')}
+                                >
+                                    Buscar Usuarios
+                                </button>
+                            </div>
+                            
+                            <div className="bg-[#141414] min-h-[500px]">
+                                {socialTab === 'feed' ? <SocialFeed /> : <UserSearch />}
+                            </div>
                         </div>
                     )}
 

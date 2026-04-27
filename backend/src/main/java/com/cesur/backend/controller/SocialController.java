@@ -1,101 +1,118 @@
 package com.cesur.backend.controller;
 
-import com.cesur.backend.model.Follow;
+import com.cesur.backend.model.Message;
+import com.cesur.backend.model.PrivateComment;
 import com.cesur.backend.model.Review;
 import com.cesur.backend.model.Usuario;
-import com.cesur.backend.repository.FollowRepository;
-import com.cesur.backend.repository.ReviewRepository;
 import com.cesur.backend.repository.UsuarioRepository;
 import com.cesur.backend.service.JwtService;
-import jakarta.transaction.Transactional;
+import com.cesur.backend.service.SocialService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/social")
 public class SocialController {
 
-    private final FollowRepository followRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final ReviewRepository reviewRepository;
+    private final SocialService socialService;
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
-    // --- 1. CONSTRUCTOR MANUAL (Sin Lombok) ---
-    public SocialController(FollowRepository followRepository, UsuarioRepository usuarioRepository, ReviewRepository reviewRepository, JwtService jwtService) {
-        this.followRepository = followRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.reviewRepository = reviewRepository;
+    public SocialController(SocialService socialService, JwtService jwtService, UsuarioRepository usuarioRepository) {
+        this.socialService = socialService;
         this.jwtService = jwtService;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    // --- 2. ENDPOINT SEGUIR USUARIO ---
-    @PostMapping("/follow/{userIdToFollow}")
-    public ResponseEntity<String> followUser(@RequestHeader("Authorization") String token, @PathVariable Long userIdToFollow) {
+    private Usuario getUsuarioFromToken(String token) {
+        String email = jwtService.getUsernameFromToken(token.substring(7));
+        return usuarioRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Usuario>> searchUsers(@RequestParam String q) {
+        return ResponseEntity.ok(socialService.searchUsers(q));
+    }
+
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
         Usuario me = getUsuarioFromToken(token);
-
-        Usuario userToFollow = usuarioRepository.findById(userIdToFollow)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Evitar seguirse a uno mismo
-        if (me.getId().equals(userToFollow.getId())) {
-            return ResponseEntity.badRequest().body("No puedes seguirte a ti mismo");
-        }
-
-        // Evitar duplicados
-        if (followRepository.findByFollowerAndFollowed(me, userToFollow).isPresent()) {
-            return ResponseEntity.badRequest().body("Ya sigues a este usuario");
-        }
-
-        // Crear Follow manualmente (Sin Builder)
-        Follow follow = new Follow();
-        follow.setFollower(me);
-        follow.setFollowed(userToFollow);
-
-        followRepository.save(follow);
-        return ResponseEntity.ok("Ahora sigues al usuario " + userToFollow.getUsername());
+        Usuario target = usuarioRepository.findById(userId).orElseThrow();
+        
+        boolean isFollowing = socialService.isFollowing(me, target);
+        boolean areMutuals = socialService.areMutuals(me, target);
+        
+        return ResponseEntity.ok(Map.of(
+                "user", target,
+                "isFollowing", isFollowing,
+                "areMutuals", areMutuals
+        ));
     }
 
-    // --- 3. ENDPOINT DEJAR DE SEGUIR ---
-    @Transactional
-    @DeleteMapping("/unfollow/{userIdToUnfollow}")
-    public ResponseEntity<String> unfollowUser(@RequestHeader("Authorization") String token, @PathVariable Long userIdToUnfollow) {
+    @PostMapping("/follow/{userId}")
+    public ResponseEntity<?> toggleFollow(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
         Usuario me = getUsuarioFromToken(token);
-
-        Usuario userToUnfollow = usuarioRepository.findById(userIdToUnfollow)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        followRepository.deleteByFollowerAndFollowed(me, userToUnfollow);
-        return ResponseEntity.ok("Has dejado de seguir a " + userToUnfollow.getUsername());
+        if (me.getId().equals(userId)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No puedes seguirte a ti mismo"));
+        }
+        socialService.toggleFollow(me.getId(), userId);
+        return ResponseEntity.ok(Map.of("message", "Follow state updated"));
     }
 
-    // --- 4. ENDPOINT FEED (Novedades) ---
     @GetMapping("/feed")
     public ResponseEntity<List<Review>> getFeed(@RequestHeader("Authorization") String token) {
         Usuario me = getUsuarioFromToken(token);
-
-        // A. Obtengo la lista de follows
-        List<Follow> follows = followRepository.findByFollower(me);
-
-        // B. Saco los usuarios (amigos) de esa lista
-        List<Usuario> followingUsers = follows.stream()
-                .map(Follow::getFollowed)
-                .collect(Collectors.toList());
-
-        // C. Añado mis propias reviews para verlas también
-        followingUsers.add(me);
-
-        // D. Busco reviews de esa lista de Usuarios
-        List<Review> feedReviews = reviewRepository.findByUserInOrderByWatchedAtDesc(followingUsers);
-
-        return ResponseEntity.ok(feedReviews);
+        return ResponseEntity.ok(socialService.getFeedForUser(me.getId()));
     }
 
-    // Método auxiliar corregido
-    private Usuario getUsuarioFromToken(String token) {
-        String email = jwtService.getUsernameFromToken(token.substring(7));
-        return usuarioRepository.findByEmail(email).orElseThrow();
+    @PostMapping("/messages/{receiverId}")
+    public ResponseEntity<?> sendMessage(@RequestHeader("Authorization") String token, 
+                                         @PathVariable Long receiverId, 
+                                         @RequestBody Map<String, String> payload) {
+        try {
+            Usuario me = getUsuarioFromToken(token);
+            Message msg = socialService.sendMessage(me.getId(), receiverId, payload.get("content"));
+            return ResponseEntity.ok(msg);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/messages/history/{userId}")
+    public ResponseEntity<?> getChatHistory(@RequestHeader("Authorization") String token, @PathVariable Long userId) {
+        try {
+            Usuario me = getUsuarioFromToken(token);
+            List<Message> history = socialService.getChatHistory(me.getId(), userId);
+            return ResponseEntity.ok(history);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reviews/{reviewId}/comments")
+    public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token, 
+                                        @PathVariable Long reviewId, 
+                                        @RequestBody Map<String, String> payload) {
+        try {
+            Usuario me = getUsuarioFromToken(token);
+            PrivateComment comment = socialService.addPrivateComment(me.getId(), reviewId, payload.get("content"));
+            return ResponseEntity.ok(comment);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/reviews/{reviewId}/comments")
+    public ResponseEntity<?> getComments(@RequestHeader("Authorization") String token, @PathVariable Long reviewId) {
+        try {
+            Usuario me = getUsuarioFromToken(token);
+            List<PrivateComment> comments = socialService.getPrivateCommentsForReview(reviewId, me.getId());
+            return ResponseEntity.ok(comments);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

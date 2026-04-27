@@ -72,61 +72,7 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <nav className={`navbar ${isScrolled ? "nav-black" : ""}`}>
-                <div className="nav-left">
-                    <div className="logo" onClick={() => window.scrollTo(0, 0)}>The Theatre</div>
-                    <span className="nav-link">Inicio</span>
-                    <span className="nav-link">Series</span>
-                    <span className="nav-link">Películas</span>
-                </div>
 
-                <div className="nav-center">
-                    <form onSubmit={handleSearch} className="search-box">
-                        <SearchIcon />
-                        <input
-                            type="text"
-                            placeholder="Buscar títulos, actores..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </form>
-                </div>
-
-                <div className="nav-right">
-                    <div className="mobile-search-icon" onClick={() => setShowMobileSearch(!showMobileSearch)}>
-                        <SearchIcon />
-                    </div>
-
-                    <div className="profile-container" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                        <UserIcon />
-                        {showProfileMenu && (
-                            <div className="profile-dropdown">
-                                <div className="dropdown-item" onClick={() => navigate('/profile')}>
-                                    👤 Mi Perfil
-                                </div>
-                                <div className="dropdown-divider"></div>
-                                <div className="dropdown-item logout" onClick={handleLogout}>
-                                    Cerrar Sesión
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav>
-
-            {showMobileSearch && (
-                <div className="mobile-search-bar">
-                    <form onSubmit={handleSearch}>
-                        <input
-                            autoFocus
-                            type="text"
-                            placeholder="Buscar..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </form>
-                </div>
-            )}
 
             {featuredMovie && (
                 <header

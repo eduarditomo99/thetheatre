@@ -6,11 +6,19 @@ import PersonDetail from './pages/PersonDetail';
 import SearchPage from './pages/SearchPage';
 import Profile from './pages/Profile';
 import ScrollToTop from './components/ScrollToTop';
+import Navbar from './components/Navbar';
+
+// Módulo Social
+import SocialFeed from './pages/SocialFeed';
+import UserSearch from './pages/UserSearch';
+import UserProfile from './pages/UserProfile';
+import PrivateChat from './pages/PrivateChat';
 
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <Navbar />
 
       <Routes>
         <Route path="/" element={<Login />} />
@@ -19,6 +27,12 @@ function App() {
         <Route path="/person/:id" element={<PersonDetail />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Profile />} />
+
+        {/* Rutas Módulo Social */}
+        <Route path="/feed" element={<div style={{ paddingTop: '100px', paddingLeft: '4%', paddingRight: '4%', minHeight: '100vh', backgroundColor: '#141414' }}><SocialFeed /></div>} />
+        <Route path="/users" element={<div style={{ paddingTop: '100px', paddingLeft: '4%', paddingRight: '4%', minHeight: '100vh', backgroundColor: '#141414' }}><UserSearch /></div>} />
+        <Route path="/user/:id" element={<UserProfile />} />
+        <Route path="/chat/:id" element={<PrivateChat />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
