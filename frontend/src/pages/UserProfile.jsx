@@ -64,21 +64,21 @@ const UserProfile = () => {
                                 </span>
                             )}
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex flex-col md:flex-row w-full md:w-auto gap-3 mt-4 sm:mt-0">
                             {areMutuals && (
                                 <Link 
                                     to={`/chat/${user.id}`} 
-                                    className="px-6 py-2 bg-transparent border border-[#555] hover:bg-[#333] text-[#ccc] rounded font-medium transition flex items-center"
+                                    className="w-full md:w-auto bg-transparent border border-[#555] hover:bg-[#333] text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center text-center"
                                 >
                                     Enviar Mensaje
                                 </Link>
                             )}
                             <button 
                                 onClick={handleFollowToggle}
-                                className={`px-6 py-2 rounded font-bold transition ${
+                                className={`w-full md:w-auto font-semibold py-2 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center text-center ${
                                     isFollowing 
-                                        ? 'bg-transparent border border-[#555] text-[#ccc] hover:text-white hover:border-[#999]' 
-                                        : 'bg-[#e50914] text-white hover:bg-[#b0070f]'
+                                        ? 'bg-transparent border border-[#555] text-white hover:bg-[#333]' 
+                                        : 'bg-[#e50914] text-white hover:bg-red-700'
                                 }`}
                             >
                                 {isFollowing ? 'Dejar de seguir' : 'Seguir'}

@@ -5,6 +5,7 @@ import MovieDetail from './pages/MovieDetail';
 import PersonDetail from './pages/PersonDetail';
 import SearchPage from './pages/SearchPage';
 import Profile from './pages/Profile';
+import CategoryView from './pages/CategoryView';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/person/:id" element={<PersonDetail />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/categoria/:nombre" element={<CategoryView />} />
 
         {/* Rutas Módulo Social */}
         <Route path="/feed" element={<div style={{ paddingTop: '100px', paddingLeft: '4%', paddingRight: '4%', minHeight: '100vh', backgroundColor: '#141414' }}><SocialFeed /></div>} />
