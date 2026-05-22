@@ -38,12 +38,12 @@ const Row = ({ title, endpoint, isLarge }) => {
 
     return (
         <div className="row">
-            <h2 className="group inline-block cursor-pointer">
-                <Link to={`/categoria/${slug}`} state={{ endpoint, title }} className="text-white decoration-transparent hover:text-[#e50914] transition-colors flex items-center gap-2">
-                    {title}
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-sm pt-1">Ver todo &gt;</span>
+            <div className="flex flex-col items-start mb-4 px-4 gap-1">
+                <h2 className="text-xl md:text-2xl font-bold text-white m-0">{title}</h2>
+                <Link to={`/categoria/${slug}`} state={{ endpoint, title }} className="text-sm font-semibold text-gray-400 hover:text-red-600 transition-colors duration-300 cursor-pointer">
+                    Ver todo
                 </Link>
-            </h2>
+            </div>
             <div className={`row-slider-container ${isLarge ? "is-large" : ""}`}>
                 <div className="slider-arrow left" onClick={() => scroll(-300)}>
                     <ChevronLeft />

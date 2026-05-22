@@ -61,7 +61,7 @@ const CategoryView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#141414] text-white pt-[100px] px-[4%] pb-12">
+        <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12" style={{ paddingTop: '100px' }}>
             <div className="flex items-center gap-4 mb-8 border-b border-[#333] pb-4">
                 <button 
                     onClick={() => navigate(-1)} 
@@ -72,24 +72,24 @@ const CategoryView = () => {
                 <h1 className="text-3xl font-bold">{title}</h1>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {movies.map(movie => (
                     <div 
                         key={`${movie.id}-${Math.random()}`}
-                        className="cursor-pointer group relative rounded-lg overflow-hidden transition-transform duration-300 hover:scale-105 hover:z-10 shadow-lg border border-transparent hover:border-[#555]"
+                        className="relative group cursor-pointer rounded-lg overflow-hidden"
                         onClick={() => navigate(`/movie/${movie.id}`)}
                     >
                         <img 
                             src={movie.poster_path ? `${base_url}${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=Sin+Imagen'} 
                             alt={movie.title || movie.name}
-                            className="w-full h-auto object-cover aspect-[2/3]"
+                            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                             onError={(e) => { e.target.src = 'https://via.placeholder.com/500x750?text=Sin+Imagen'; }}
                         />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-80 transition-opacity duration-300 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100">
-                            <h3 className="font-bold text-sm mb-1">{movie.title || movie.name}</h3>
-                            <div className="flex justify-between items-center text-xs text-[#aaa]">
-                                <span>{movie.release_date?.split('-')[0] || movie.first_air_date?.split('-')[0]}</span>
-                                <span className="bg-[#e50914] text-white px-2 py-0.5 rounded font-bold">{Math.round(movie.vote_average * 10)}%</span>
+                        <div className="mt-2 p-2">
+                            <h3 className="truncate text-sm font-bold">{movie.title || movie.name}</h3>
+                            <div className="flex items-center gap-2 text-xs font-semibold mt-1">
+                                <span className="bg-green-600/20 text-green-500 px-2 py-0.5 rounded">TMDB: {Math.round(movie.vote_average * 10)}%</span>
+                                <span className="text-gray-400">{movie.release_date?.split('-')[0] || movie.first_air_date?.split('-')[0]}</span>
                             </div>
                         </div>
                     </div>
@@ -103,14 +103,12 @@ const CategoryView = () => {
             )}
 
             {!loading && hasMore && movies.length > 0 && (
-                <div className="flex justify-center mt-12">
-                    <button 
-                        onClick={loadMore}
-                        className="bg-[#e50914] hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300"
-                    >
-                        Cargar más películas
-                    </button>
-                </div>
+                <button 
+                    onClick={loadMore}
+                    className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300 mt-8 block mx-auto"
+                >
+                    Cargar más películas
+                </button>
             )}
         </div>
     );

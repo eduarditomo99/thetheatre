@@ -6,30 +6,43 @@ const PersonDetail = () => {
     const { id } = useParams();
     const [person, setPerson] = useState(null);
     const [credits, setCredits] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
     const base_url = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
+            setError(null);
             try {
                 const personRes = await tmdbApi.get(`/person/${id}?language=es-ES`);
                 setPerson(personRes.data);
 
                 const creditsRes = await tmdbApi.get(`/person/${id}/combined_credits?language=es-ES`);
 
-                const sortedCredits = creditsRes.data.cast
-                    // CORRECCIÓN AQUÍ: Filtramos para que SOLO pasen las películas
+                const castArray = creditsRes.data.cast || [];
+                const crewArray = creditsRes.data.crew || [];
+                const allCredits = [...castArray, ...crewArray];
+
+                const sortedCredits = allCredits
                     .filter(item => item.poster_path && item.media_type === 'movie')
-                    .sort((a, b) => b.popularity - a.popularity);
+                    .filter((item, index, self) => index === self.findIndex((t) => t.id === item.id))
+                    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
                 setCredits(sortedCredits);
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error("Error al cargar persona:", err);
+                setError("No se pudo cargar la información de esta persona.");
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
     }, [id]);
 
+    if (loading) return <div style={{ backgroundColor: '#141414', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>Cargando...</div>;
+    if (error) return <div style={{ backgroundColor: '#141414', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#e50914' }}>{error}</div>;
     if (!person) return <div style={{ backgroundColor: '#141414', height: '100vh' }}></div>;
 
     return (
